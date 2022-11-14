@@ -6,7 +6,7 @@
 /*   By: mortiz-d <mortiz-d@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/09 12:00:57 by mortiz-d          #+#    #+#             */
-/*   Updated: 2022/11/11 13:19:49 by mortiz-d         ###   ########.fr       */
+/*   Updated: 2022/11/14 11:59:08 by mortiz-d         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,7 @@ int main(int argc, char **argv)
 	else
 		return (exit_msg("Bad Check"));
 	// sock = socket( 0,SOCK_STREAM,PF_INET6);
+	//serv->connect_to_host();
+	serv->server_listening();
 	return (0);
-
 }
