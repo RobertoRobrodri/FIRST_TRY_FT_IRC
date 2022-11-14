@@ -74,7 +74,7 @@ std::ostream &operator<<(std::ostream& os, const server &tmp)
 
 bool	server::is_good_host(std::string host) const
 {
-  std::stringstream test(host);
+  	std::stringstream test(host);
     std::string segment;
     std::vector <int>seglist;
 
@@ -141,7 +141,7 @@ int		server::connect_to_host(void)
 
 	if ((this->host_socket = socket(AF_INET, SOCK_STREAM, 0)) == -1)
 		return 0;
-	std::cout << "Init socket" << std::endl;
+	std::cout << "Connecting to host" << std::endl;
 	addr = init_socket_struct(this->network_port, this->host);
 	if (connect(this->host_socket, (const sock_addr*)&addr, sizeof(addr)) == -1)
 	{
@@ -159,7 +159,6 @@ int		server::server_listening(void)
 
 	if ((this->client_socket = socket(AF_INET, SOCK_STREAM, 0)) == -1)
 		return 0;
-	std::cout << "Init socket" << std::endl;
 	// No sé que opciones tendremos que habilitar pero vamos a tener que usarlo
 	if (setsockopt(this->client_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1)
 	{
@@ -179,5 +178,32 @@ int		server::server_listening(void)
 		perror("Can't hear you");
 		return 0;
 	}
+	std::cout << "Server listening" << std::endl;
 	return 1;
+}
+
+void	server::wait_for_msg(void)
+{
+	sock_in 	client;
+	socklen_t	cli_size;
+	char 		buff[4096];
+	int 		bytes_recieved;
+	
+	
+	std::cout << "Espera a que llegue un cliente" << std::endl;
+	cli_size = sizeof(client);
+	if (accept(this->client_socket, (sock_addr *) &client, &cli_size) == -1)
+		std::cout << "Problem with client: "<< std::endl;
+	else
+	{
+		std::cout << "Una vez tiene el cliente escucha que coño quiere decir" << std::endl;
+		while (true)
+		{
+			memset(buff,0,4096);
+			bytes_recieved = recv(this->client_socket,buff,4096,0);
+			if ( bytes_recieved != -1)
+				std::cout << "Server : " << std::string(buff,bytes_recieved) << std::endl;
+		}
+	}
+	
 }

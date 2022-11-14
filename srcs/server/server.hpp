@@ -47,8 +47,9 @@ class	server {
 		#				FUNCTIONS					#
 		############################################*/
 		bool	check_data_correct(void) const;
-		int		connect_to_host(void); // Creo que no necesitamos esta funcion
+		int		connect_to_host(void); // Creo que no necesitamos esta funcion | puede servir para ver si nos podemos conectar al servidor mismo
 		int		server_listening(void);
+		void	wait_for_msg(void);
 };
 
 std::ostream &operator<<(std::ostream& os, const server &tmp);
