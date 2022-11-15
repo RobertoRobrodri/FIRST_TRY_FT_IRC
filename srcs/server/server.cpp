@@ -135,45 +135,28 @@ sock_in	init_socket_struct(std::string port, std::string host)
 	return addr;
 }
 
-int		server::connect_to_host(void)
-{
-	sock_in  addr;
-
-	if ((this->host_socket = socket(AF_INET, SOCK_STREAM, 0)) == -1)
-		return 0;
-	std::cout << "Connecting to host" << std::endl;
-	addr = init_socket_struct(this->network_port, this->host);
-	if (connect(this->host_socket, (const sock_addr*)&addr, sizeof(addr)) == -1)
-	{
-		perror("Connection failed");
-		return 0;
-	}
-	std::cout << "Connected!" << std::endl;
-	return 1;
-}
-
 int		server::server_listening(void)
 {
 	sock_in	addr;
 	int		opt = 1;
 
-	if ((this->client_socket = socket(AF_INET, SOCK_STREAM, 0)) == -1)
+	if ((this->host_socket = socket(AF_INET, SOCK_STREAM, 0)) == -1)
 		return 0;
 	// No sé que opciones tendremos que habilitar pero vamos a tener que usarlo
-	if (setsockopt(this->client_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1)
+	if (setsockopt(this->host_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1)
 	{
 		perror("Bad socket ");
 		return 0;
 	}
 	addr = init_socket_struct(this->network_port, this->host);
 	// Asigna un nombre al socket; Asigna la info de address al socket
-	if (bind(this->client_socket, (const sock_addr*)&addr, sizeof(addr)) == -1)
+	if (bind(this->host_socket, (const sock_addr*)&addr, sizeof(addr)) == -1)
 	{
 		perror("Error binding ");
 		return 0;
 	}
 	// Tenemos que definir un max_size para la cola
-	if (listen(this->client_socket, 5) == -1)
+	if (listen(this->host_socket, 5) == -1)
 	{
 		perror("Can't hear you");
 		return 0;
@@ -192,15 +175,15 @@ void	server::wait_for_msg(void)
 	
 	std::cout << "Espera a que llegue un cliente" << std::endl;
 	cli_size = sizeof(client);
-	if (accept(this->client_socket, (sock_addr *) &client, &cli_size) == -1)
+	if (accept(this->host_socket, (sock_addr *) &client, &cli_size) == -1)
 		std::cout << "Problem with client: "<< std::endl;
 	else
 	{
-		std::cout << "Una vez tiene el cliente escucha que coño quiere decir" << std::endl;
+		std::cout << "Una vez tiene el cliente escucha que quiere decir" << std::endl;
 		while (true)
 		{
 			memset(buff,0,4096);
-			bytes_recieved = recv(this->client_socket,buff,4096,0);
+			bytes_recieved = recv(this->host_socket,buff,4096,0);
 			if ( bytes_recieved != -1)
 				std::cout << "Server : " << std::string(buff,bytes_recieved) << std::endl;
 		}
