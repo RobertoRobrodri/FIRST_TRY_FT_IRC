@@ -6,7 +6,7 @@
 /*   By: mortiz-d <mortiz-d@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/09 12:00:57 by mortiz-d          #+#    #+#             */
-/*   Updated: 2022/11/14 15:06:33 by mortiz-d         ###   ########.fr       */
+/*   Updated: 2022/11/15 14:14:38 by mortiz-d         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,6 @@ int main(int argc, char **argv)
 	else
 		return (exit_msg("Bad Check"));
 	serv->server_listening();
-	// serv->connect_to_host();
 	serv->wait_for_msg();
 
 	// std::cout << "Server listening "<< std::endl;
