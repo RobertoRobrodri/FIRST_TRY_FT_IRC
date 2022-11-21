@@ -15,14 +15,14 @@
 #include <vector>
 #include <sstream>
 
-server::server( void ) : host(""), network_pass (""), network_port(""), port(""), password("")
+server::server( void ) : fds((pollfd *)calloc(sizeof(pollfd), N_CLIENTS)), host(""), network_pass (""), network_port(""), port(""), password(""), status(true), current_size(1)
 {
 
   std::cout << "Default constructor called" << std::endl;
 
 }
 
-server::server( std::string network , std::string prt , std::string pass ) : host(""), network_port (""), network_pass(""), port(""), password("")
+server::server( std::string network , std::string prt , std::string pass ) : fds((pollfd *)calloc(sizeof(pollfd), N_CLIENTS)), host(""), network_pass(""), network_port (""), port(""), password(""), status(true), current_size(1)
 {
     std::stringstream test(network);
     std::string segment;
@@ -43,22 +43,23 @@ server::server( std::string network , std::string prt , std::string pass ) : hos
 
 }
 
-server::server( const server & var ) {
-
-  std::cout << "Copy constructor called" << std::endl;
-
+server::server( const server & var )
+{
+	(void) var;
+	std::cout << "Copy constructor called" << std::endl;
 }
 
-server::~server( void ) {
-
-  std::cout << "Destructor constructor called" << std::endl;
-
+server::~server( void ) 
+{
+	delete this->fds;
+	std::cout << "Destructor constructor called" << std::endl;
 }
 
 server & server::operator=(const server &tmp)
 {
-  std::cout << "Operator equalizer called" << std::endl;
-  return *this;
+	(void) tmp;
+	std::cout << "Operator equalizer called" << std::endl;
+	return *this;
 }
 
 std::ostream &operator<<(std::ostream& os, const server &tmp)
@@ -156,7 +157,7 @@ int		server::server_listening(void)
 		return 0;
 	}
 	// Tenemos que definir un max_size para la cola
-	if (listen(this->host_socket, 5) == -1)
+	if (listen(this->host_socket, N_CLIENTS) == -1)
 	{
 		perror("Can't hear you");
 		return 0;
@@ -188,5 +189,89 @@ void	server::wait_for_msg(void)
 				std::cout << "Server : " << std::string(buff,bytes_recieved) << std::endl;
 		}
 	}
+}
+
+int	server::start(void)
+{
+	int		poll_result;
+	int		new_sd;
+	bool	close_connection;
+	char 	buff[4096];
+	int		bytes_recieved;
+
+	this->fds[0].fd = this->host_socket;
+  	this->fds[0].events = POLLIN;
+	do
+	{
+		poll_result = poll(this->fds, N_CLIENTS, TIMEOUT_MS);
+		if (poll_result < 1) 	//Poll failed
+			break;
+		if 	(poll_result == 0) //Poll no result
+			break;
+		for (int i = 0; i < current_size;i++)
+		{
+			if (this->fds[i].revents == 0)
+				continue;
+			if(fds[i].revents != POLLIN)
+			{
+				std::cout << "Error revent is  : " << fds[i].revents << std::endl;
+				this->status = false;
+				break;
+			}
+			if (fds[i].fd == this->host_socket)
+      		{
+				do
+				{
+					new_sd = accept(this->host_socket, NULL, NULL);
+					if (new_sd < 0)
+					{
+						if (errno != EWOULDBLOCK)
+						{
+							std::cout << "Error accept failed " << std::endl;
+							this->status = false;
+						}
+						break;
+					}
+					fds[this->current_size - 1].fd = new_sd;
+					fds[this->current_size - 1].events = POLLIN;
+					this->current_size++;
+
+				} while (new_sd != 1);
+			}
+			else
+			{
+				close_connection = false;
+				bytes_recieved = recv(fds[i].fd, buff, sizeof(buff), 0);
+				do
+				{
+					if (bytes_recieved < 0)
+					{
+						if (errno != EWOULDBLOCK)
+						{
+							std::cout << "Error recv() failed " << std::endl;
+							close_connection = true;
+						}
+						break;
+					}
+					if (bytes_recieved == 0)
+					{
+						std::cout << "Connection closed "<< std::endl;
+						close_connection = true;
+						break;
+					}
+					std::cout << "HE RECIBIDO "<< bytes_recieved << " bytes!! SUUUUUU"<< std::endl;
+				} while (true);
+
+					
+			}
+		}
+
+
+
+
+
+	}
+	while (this->status);
 	
+	return (0);
 }

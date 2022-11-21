@@ -2,6 +2,13 @@
 #define SERVER_HPP
 #define	sock_in		struct sockaddr_in
 #define	sock_addr	struct sockaddr
+#ifndef N_CLIENTS
+	#define N_CLIENTS 1
+#endif
+#ifndef TIMEOUT_MS
+	#define TIMEOUT_MS 3*1000*60
+#endif
+#include <poll.h>
 #include <string>
 #include <iostream>
 #include <cstring>
@@ -14,13 +21,15 @@ class	server {
 
 	private:
 
-		int	host_socket;
-
+		pollfd		*fds;
+		int			host_socket;
 		std::string host;
 		std::string network_pass;
 		std::string network_port;
 		std::string port;
 		std::string password;
+		bool		status;
+		int			current_size;
 
 		server	( void );
 		bool	is_good_port(std::string port) const;
@@ -46,8 +55,9 @@ class	server {
 		#				FUNCTIONS					#
 		############################################*/
 		bool	check_data_correct(void) const;
+		int		start(void);
 		int		server_listening(void);
-		void	wait_for_msg(void);
+		void	wait_for_msg(void); //Innecesario pero escucha un cliente (ahira toca con multiples)
 };
 
 std::ostream &operator<<(std::ostream& os, const server &tmp);
