@@ -3,7 +3,7 @@
 #define	sock_in		struct sockaddr_in
 #define	sock_addr	struct sockaddr
 #ifndef N_CLIENTS
-	#define N_CLIENTS 1
+	#define N_CLIENTS 5+1
 #endif
 #ifndef TIMEOUT_MS
 	#define TIMEOUT_MS 3*1000*60
@@ -21,7 +21,7 @@ class	server {
 
 	private:
 
-		pollfd		*fds;
+		pollfd		fds[N_CLIENTS];
 		int			host_socket;
 		std::string host;
 		std::string network_pass;

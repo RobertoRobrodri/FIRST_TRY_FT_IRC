@@ -6,7 +6,7 @@
 /*   By: mortiz-d <mortiz-d@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/09 12:00:57 by mortiz-d          #+#    #+#             */
-/*   Updated: 2022/11/21 14:06:26 by mortiz-d         ###   ########.fr       */
+/*   Updated: 2022/11/22 14:44:53 by mortiz-d         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@ int main(int argc, char **argv)
 		return (exit_msg("Bad Check"));
 	
 	if (serv->server_listening())
-			serv->wait_for_msg();
+			serv->start();
 
 	// std::cout << "Server listening "<< std::endl;
 	delete serv;

@@ -11,18 +11,19 @@
 /* ************************************************************************** */
 
 #include "server.hpp"
+#include <unistd.h>
 #include <string>
 #include <vector>
 #include <sstream>
 
-server::server( void ) : fds((pollfd *)calloc(sizeof(pollfd), N_CLIENTS)), host(""), network_pass (""), network_port(""), port(""), password(""), status(true), current_size(1)
+server::server( void ) :  host(""), network_pass (""), network_port(""), port(""), password(""), status(true), current_size(0)
 {
 
   std::cout << "Default constructor called" << std::endl;
 
 }
 
-server::server( std::string network , std::string prt , std::string pass ) : fds((pollfd *)calloc(sizeof(pollfd), N_CLIENTS)), host(""), network_pass(""), network_port (""), port(""), password(""), status(true), current_size(1)
+server::server( std::string network , std::string prt , std::string pass ) : host(""), network_pass(""), network_port (""), port(""), password(""), status(true), current_size(0)
 {
     std::stringstream test(network);
     std::string segment;
@@ -51,7 +52,6 @@ server::server( const server & var )
 
 server::~server( void ) 
 {
-	delete this->fds;
 	std::cout << "Destructor constructor called" << std::endl;
 }
 
@@ -191,23 +191,38 @@ void	server::wait_for_msg(void)
 	}
 }
 
+void fds_search_data(int size, pollfd *data)
+{
+	std::cout << "POLLIN VALUE IS = "<< POLL_IN << std::endl;
+	for (int i = 0;i < size ; i++)
+		std::cout << "fds[" << i <<"]fd = "<< data[i].fd <<" events = "<< data[i].events << " revents = "<< data[i].revents << std::endl;
+}
+
 int	server::start(void)
 {
 	int		poll_result;
 	int		new_sd;
 	bool	close_connection;
+	bool	compress_array;
 	char 	buff[4096];
 	int		bytes_recieved;
+	int		n_active_fds;
 
-	this->fds[0].fd = this->host_socket;
+	this->fds[0].fd 	= this->host_socket;
   	this->fds[0].events = POLLIN;
+	compress_array 		= false;
+	n_active_fds = 1;
+	this->status = true;
+	std::cout << "El server empieza este infierno que llamo proyecto status ->(" << this->status<< ")"<< std::endl;
 	do
 	{
-		poll_result = poll(this->fds, N_CLIENTS, TIMEOUT_MS);
+		poll_result = poll(this->fds, n_active_fds, TIMEOUT_MS);
+		std::cout << "poll is  : " << poll_result << std::endl;
 		if (poll_result < 1) 	//Poll failed
 			break;
 		if 	(poll_result == 0) //Poll no result
 			break;
+		current_size = n_active_fds;
 		for (int i = 0; i < current_size;i++)
 		{
 			if (this->fds[i].revents == 0)
@@ -220,58 +235,90 @@ int	server::start(void)
 			}
 			if (fds[i].fd == this->host_socket)
       		{
-				do
+				if (n_active_fds >= N_CLIENTS)
 				{
-					new_sd = accept(this->host_socket, NULL, NULL);
-					if (new_sd < 0)
-					{
-						if (errno != EWOULDBLOCK)
-						{
-							std::cout << "Error accept failed " << std::endl;
-							this->status = false;
-						}
-						break;
-					}
-					fds[this->current_size - 1].fd = new_sd;
-					fds[this->current_size - 1].events = POLLIN;
-					this->current_size++;
+					std::cout << "Connection rejected ... al fds are taken " << std::endl;
+					break;
+				}
 
-				} while (new_sd != 1);
+				new_sd = accept(this->host_socket, NULL, NULL);
+				if (new_sd < 0)
+				{
+					if (errno != EWOULDBLOCK)
+					{
+						std::cout << "Error accept failed " << std::endl;
+						this->status = false;
+					}
+					break;
+				}
+				fds[n_active_fds].fd = new_sd;
+				fds[n_active_fds].events = POLLIN;
+				std::cout << "Tenemos un nuevo cliente connectado ... en el slot "<< n_active_fds << "new_sd = "<< new_sd<< std::endl;
+				n_active_fds++;
+				fds_search_data(N_CLIENTS,this->fds);
 			}
 			else
 			{
 				close_connection = false;
 				bytes_recieved = recv(fds[i].fd, buff, sizeof(buff), 0);
-				do
+				
+				if (bytes_recieved < 0)
 				{
-					if (bytes_recieved < 0)
+					if (errno != EWOULDBLOCK)
 					{
-						if (errno != EWOULDBLOCK)
-						{
-							std::cout << "Error recv() failed " << std::endl;
-							close_connection = true;
-						}
-						break;
-					}
-					if (bytes_recieved == 0)
-					{
-						std::cout << "Connection closed "<< std::endl;
+						std::cout << "Error recv() failed " << std::endl;
 						close_connection = true;
-						break;
 					}
-					std::cout << "HE RECIBIDO "<< bytes_recieved << " bytes!! SUUUUUU"<< std::endl;
-				} while (true);
+					break;
+				}
+				if (bytes_recieved == 0)
+				{
+					std::cout << "Connection closed "<< std::endl;
+					close_connection = true;
+					break;
+				}
+				std::cout << "MSG["<< bytes_recieved<<"] : "<< std::string(buff,bytes_recieved) << std::endl;
+				this->fds[i].events = 0 ;
 
-					
+				if (close_connection == true)
+				{
+					close(this->fds[i].fd);
+					this->fds[i].fd = -1;
+          			compress_array = true;
+				}
 			}
+			
+			
 		}
-
-
-
-
-
+		// std::cout << "Damos una vuelta ... status -> "<< this->status << std::endl;
 	}
 	while (this->status);
-	
 	return (0);
 }
+
+
+
+
+// if (compress_array == true)
+// 			{
+// 				compress_array = false;
+// 				for (int x = 0; x < n_active_fds; x++)
+// 				{
+// 					if (fds[x].fd == -1)
+// 					{
+// 					for(int j = x; j < n_active_fds; j++)
+// 					{
+// 						fds[j].fd = fds[j+1].fd;
+// 					}
+// 					x--;
+// 					n_active_fds--;
+// 					}
+// 				}
+// 			}
+
+
+// for (int i = 0; i < n_active_fds; i++)
+// 	{
+// 		if(fds[i].fd >= 0)
+// 		close(fds[i].fd);
+// 	}
