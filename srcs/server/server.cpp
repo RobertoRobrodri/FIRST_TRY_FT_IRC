@@ -173,7 +173,6 @@ void	server::wait_for_msg(void)
 	char 		buff[4096];
 	int 		bytes_recieved;
 	
-	
 	std::cout << "Espera a que llegue un cliente" << std::endl;
 	cli_size = sizeof(client);
 	if (accept(this->host_socket, (sock_addr *) &client, &cli_size) == -1)
@@ -191,11 +190,11 @@ void	server::wait_for_msg(void)
 	}
 }
 
-void fds_search_data(int size, pollfd *data)
+void server::fds_search_data(void) const
 {
-	std::cout << "POLLIN VALUE IS = "<< POLL_IN << std::endl;
-	for (int i = 0;i < size ; i++)
-		std::cout << "fds[" << i <<"]fd = "<< data[i].fd <<" events = "<< data[i].events << " revents = "<< data[i].revents << std::endl;
+	std::cout << "- FDS STATUS -" << std::endl;
+	for (int i = 0;i < N_CLIENTS ; i++)
+		std::cout << "fds[" << i <<"]fd = "<< this->fds[i].fd <<" events = "<< this->fds[i].events << " revents = "<< this->fds[i].revents << std::endl;
 }
 
 int	server::start(void)
@@ -207,6 +206,7 @@ int	server::start(void)
 	char 	buff[4096];
 	int		bytes_recieved;
 	int		n_active_fds;
+	int		len;
 
 	this->fds[0].fd 	= this->host_socket;
   	this->fds[0].events = POLLIN;
@@ -217,7 +217,7 @@ int	server::start(void)
 	do
 	{
 		poll_result = poll(this->fds, n_active_fds, TIMEOUT_MS);
-		std::cout << "poll is  : " << poll_result << std::endl;
+		// std::cout << "poll is  : " << poll_result << std::endl;
 		if (poll_result < 1) 	//Poll failed
 			break;
 		if 	(poll_result == 0) //Poll no result
@@ -233,26 +233,19 @@ int	server::start(void)
 				this->status = false;
 				break;
 			}
-			if (fds[i].fd == this->host_socket)
+			if (fds[i].fd == this->host_socket && n_active_fds < N_CLIENTS)
       		{
-				if (n_active_fds >= N_CLIENTS)
-				{
-					std::cout << "Connection rejected ... al fds are taken " << std::endl;
-					break;
-				}
-
 				new_sd = accept(this->host_socket, NULL, NULL);
 				if (new_sd < 0)
 				{
-					if (errno != EWOULDBLOCK)
-					{
-						std::cout << "Error accept failed " << std::endl;
-						this->status = false;
-					}
+					std::cout << "Error accept failed " << std::endl;
+					this->status = false;
 					break;
 				}
-				fds[n_active_fds].fd = new_sd;
-				fds[n_active_fds].events = POLLIN;
+				fds[n_active_fds].fd = this->host_socket;
+				fds[n_active_fds].events = POLL_IN;
+				fds[n_active_fds - 1].fd = new_sd;
+				fds[n_active_fds - 1].events = POLLIN;
 				std::cout << "Tenemos un nuevo cliente connectado ... en el slot "<< n_active_fds << "new_sd = "<< new_sd<< std::endl;
 				n_active_fds++;
 				fds_search_data(N_CLIENTS,this->fds);
@@ -277,9 +270,16 @@ int	server::start(void)
 					close_connection = true;
 					break;
 				}
-				std::cout << "MSG["<< bytes_recieved<<"] : "<< std::string(buff,bytes_recieved) << std::endl;
-				this->fds[i].events = 0 ;
-
+				len = bytes_recieved;
+				std::cout << "MSG["<< i <<"] : "<< std::string(buff,bytes_recieved) << std::endl;
+				bytes_recieved = send(fds[i].fd, buff, len, 0);
+				if (bytes_recieved < 0)
+				{
+					std::cout << "Error send() failed " << std::endl;
+					close_connection = true;
+					break;
+				}
+				fds_search_data(N_CLIENTS,this->fds);
 				if (close_connection == true)
 				{
 					close(this->fds[i].fd);
@@ -287,17 +287,110 @@ int	server::start(void)
           			compress_array = true;
 				}
 			}
-			
-			
 		}
-		// std::cout << "Damos una vuelta ... status -> "<< this->status << std::endl;
 	}
 	while (this->status);
 	return (0);
 }
 
 
+// int	server::start(void)
+// {
+// 	int		poll_result;
+// 	int		new_sd;
+// 	bool	close_connection;
+// 	bool	compress_array;
+// 	char 	buff[4096];
+// 	int		bytes_recieved;
+// 	int		n_active_fds;
 
+// 	this->fds[0].fd 	= this->host_socket;
+//   	this->fds[0].events = POLLIN;
+// 	compress_array 		= false;
+// 	n_active_fds = 1;
+// 	this->status = true;
+// 	std::cout << "El server empieza este infierno que llamo proyecto status ->(" << this->status<< ")"<< std::endl;
+// 	do
+// 	{
+// 		poll_result = poll(this->fds, n_active_fds, TIMEOUT_MS);
+// 		std::cout << "poll is  : " << poll_result << std::endl;
+// 		if (poll_result < 1) 	//Poll failed
+// 			break;
+// 		if 	(poll_result == 0) //Poll no result
+// 			break;
+// 		current_size = n_active_fds;
+// 		for (int i = 0; i < current_size;i++)
+// 		{
+// 			if (this->fds[i].revents == 0)
+// 				continue;
+// 			if(fds[i].revents != POLLIN)
+// 			{
+// 				std::cout << "Error revent is  : " << fds[i].revents << std::endl;
+// 				this->status = false;
+// 				break;
+// 			}
+// 			if (fds[i].fd == this->host_socket)
+//       		{
+// 				if (n_active_fds >= N_CLIENTS)
+// 				{
+// 					std::cout << "Connection rejected ... al fds are taken " << std::endl;
+// 					break;
+// 				}
+
+// 				new_sd = accept(this->host_socket, NULL, NULL);
+// 				if (new_sd < 0)
+// 				{
+// 					if (errno != EWOULDBLOCK)
+// 					{
+// 						std::cout << "Error accept failed " << std::endl;
+// 						this->status = false;
+// 					}
+// 					break;
+// 				}
+// 				fds[n_active_fds].fd = new_sd;
+// 				fds[n_active_fds].events = POLLIN;
+// 				std::cout << "Tenemos un nuevo cliente connectado ... en el slot "<< n_active_fds << "new_sd = "<< new_sd<< std::endl;
+// 				n_active_fds++;
+// 				fds_search_data(N_CLIENTS,this->fds);
+// 			}
+// 			else
+// 			{
+// 				close_connection = false;
+// 				bytes_recieved = recv(fds[i].fd, buff, sizeof(buff), 0);
+				
+// 				if (bytes_recieved < 0)
+// 				{
+// 					if (errno != EWOULDBLOCK)
+// 					{
+// 						std::cout << "Error recv() failed " << std::endl;
+// 						close_connection = true;
+// 					}
+// 					break;
+// 				}
+// 				if (bytes_recieved == 0)
+// 				{
+// 					std::cout << "Connection closed "<< std::endl;
+// 					close_connection = true;
+// 					break;
+// 				}
+// 				std::cout << "MSG["<< i <<"] : "<< std::string(buff,bytes_recieved) << std::endl;
+// 				this->fds[i].events = 0 ;
+
+// 				if (close_connection == true)
+// 				{
+// 					close(this->fds[i].fd);
+// 					this->fds[i].fd = -1;
+//           			compress_array = true;
+// 				}
+// 			}
+			
+			
+// 		}
+// 		// std::cout << "Damos una vuelta ... status -> "<< this->status << std::endl;
+// 	}
+// 	while (this->status);
+// 	return (0);
+// }
 
 // if (compress_array == true)
 // 			{

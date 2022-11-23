@@ -18,3 +18,7 @@ IRSSI $> brew install irssi
 
 Poll
 //fcntl(fd, F_SETFL, O_NONBLOCK);
+
+# Connection Protocol
+https://modern.ircdocs.horse/#client-to-server
+https://modern.ircdocs.horse/#rplwelcome-001

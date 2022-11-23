@@ -32,9 +32,17 @@ class	server {
 		int			current_size;
 
 		server	( void );
+		/*###########################################
+		#			PRIVATE    	FUNCTIONS			#
+		############################################*/
 		bool	is_good_port(std::string port) const;
 		bool	is_good_host(std::string host) const;
 
+
+		/*###########################################
+		#			DEBUG    	FUNCTIONS			#
+		############################################*/
+		void fds_search_data(void) const;
 	public:
 
 		server	( std::string network , std::string prt , std::string pass );
@@ -52,7 +60,7 @@ class	server {
 		std::string get_password(void) const 		{return(this->password);};
 
 		/*###########################################
-		#				FUNCTIONS					#
+		#			PUBLIC	FUNCTIONS				#
 		############################################*/
 		bool	check_data_correct(void) const;
 		int		start(void);
