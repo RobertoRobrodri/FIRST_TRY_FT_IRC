@@ -220,7 +220,7 @@ int	server::start(void)
 		// std::cout << "poll is  : " << poll_result << std::endl;
 		if (poll_result < 1) 	//Poll failed
 			break;
-		if 	(poll_result == 0) //Poll no result
+		if (poll_result == 0) //Poll no result
 			break;
 		current_size = n_active_fds;
 		for (int i = 0; i < current_size;i++)
@@ -248,7 +248,7 @@ int	server::start(void)
 				fds[n_active_fds - 1].events = POLLIN;
 				std::cout << "Tenemos un nuevo cliente connectado ... en el slot "<< n_active_fds << "new_sd = "<< new_sd<< std::endl;
 				n_active_fds++;
-				fds_search_data(N_CLIENTS,this->fds);
+				fds_search_data();
 			}
 			else
 			{
@@ -272,6 +272,8 @@ int	server::start(void)
 				}
 				len = bytes_recieved;
 				std::cout << "MSG["<< i <<"] : "<< std::string(buff,bytes_recieved) << std::endl;
+				// bytes_recieved = send(fds[i].fd, buff, len, 0);
+				// bytes_recieved = send(fds[i].fd,   "<client> :Welcome to the <networkname> Network, miguel[!<mortiz-d>@<host>]", len, 0);
 				bytes_recieved = send(fds[i].fd, buff, len, 0);
 				if (bytes_recieved < 0)
 				{
@@ -279,7 +281,7 @@ int	server::start(void)
 					close_connection = true;
 					break;
 				}
-				fds_search_data(N_CLIENTS,this->fds);
+				fds_search_data();
 				if (close_connection == true)
 				{
 					close(this->fds[i].fd);

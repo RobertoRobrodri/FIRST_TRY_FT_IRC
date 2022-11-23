@@ -17,6 +17,7 @@ CXXFLAGS 	= -Wall -Wextra #-Werror
 #
 SRC_PATH    	= srcs
 SUBFILE1_PATH   = server
+SUBFILE2_PATH   = client
 OBJ_PATH    	= objects
 TEST_PATH		= test
 
@@ -24,8 +25,11 @@ TEST_PATH		= test
 
 SUBFILE1_SRC = server.cpp
 
+SUBFILE2_SRC = client.cpp
+
 SRC =  	main.cpp \
-		$(addprefix $(SUBFILE1_PATH)/, $(SUBFILE1_SRC))
+		$(addprefix $(SUBFILE1_PATH)/, $(SUBFILE1_SRC)) \
+		$(addprefix $(SUBFILE2_PATH)/, $(SUBFILE2_SRC))
 
 
 
@@ -41,6 +45,7 @@ OBJS =  $(addprefix $(OBJ_PATH)/, $(SRC:%.cpp=%.o))
 $(OBJ_PATH):
 	mkdir -p $(OBJ_PATH)
 	mkdir -p $(addprefix $(OBJ_PATH)/, $(SUBFILE1_PATH))
+	mkdir -p $(addprefix $(OBJ_PATH)/, $(SUBFILE2_PATH))
 
 
 $(OBJ_PATH)/%.o: $(SRC_PATH)/%.cpp | $(OBJ_PATH)

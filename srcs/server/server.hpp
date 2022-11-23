@@ -2,12 +2,11 @@
 #define SERVER_HPP
 #define	sock_in		struct sockaddr_in
 #define	sock_addr	struct sockaddr
-#ifndef N_CLIENTS
-	#define N_CLIENTS 5+1
-#endif
-#ifndef TIMEOUT_MS
-	#define TIMEOUT_MS 3*1000*60
-#endif
+
+#define N_CLIENTS 5+1			//Numero de Clientes (fd) + el fd del host
+#define TIMEOUT_MS 3*1000*60 	//Tiempo de desconexion en caso de no recivir nada
+
+#include "../client/client.hpp"
 #include <poll.h>
 #include <string>
 #include <iostream>
@@ -22,6 +21,7 @@ class	server {
 	private:
 
 		pollfd		fds[N_CLIENTS];
+		// client		clients[N_CLIENTS];
 		int			host_socket;
 		std::string host;
 		std::string network_pass;
