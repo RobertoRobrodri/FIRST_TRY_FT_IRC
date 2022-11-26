@@ -20,8 +20,8 @@ class	server {
 
 	private:
 
-		pollfd		fds[N_CLIENTS];
-		// client		clients[N_CLIENTS];
+//		pollfd		fds[N_CLIENTS];
+		client		clients[N_CLIENTS];
 		int			host_socket;
 		std::string host;
 		std::string network_pass;

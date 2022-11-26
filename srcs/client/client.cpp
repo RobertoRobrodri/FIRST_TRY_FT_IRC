@@ -20,17 +20,17 @@ client::client( void ) : realname_host(""), username_host(""), nick("")
 client::client( std::string rh, std::string uh, std::string ni) : realname_host(rh), username_host(uh), nick(ni)
 {
   std::cout << "Parameter Client constructor called" << std::endl;
-  
+
 }
 
 client::client( const client & var ) {
   *this = var;
   std::cout << "Copy constructor called" << std::endl;
-  
+
 }
 
 client::~client( void ) {
-  
+
   std::cout << "Destructor constructor called" << std::endl;
 
 }
@@ -47,7 +47,7 @@ client &client::operator=(const client &tmp)
 std::ostream &operator<<(std::ostream& os, const client &tmp)
 {
 	std::cout << "Operator output called" << std::endl;
-  os << "Client output" << std::endl;
+	os << "Client output" << std::endl;
 	os << "realname_host	|     " << tmp.getnick() << std::endl;
 	os << "username_host	|     " << tmp.getrealname_host() << std::endl;
 	os << "nickname			|     " << tmp.getusername_host() << std::endl;
