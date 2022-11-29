@@ -16,7 +16,7 @@ class	client {
 		std::string nick;
 	public:
 
-		pollfd		fds[N_CLIENTS];
+		//pollfd		fds[N_CLIENTS];
 
 		client ( void );
 		client ( std::string rh, std::string uh, std::string ni);
@@ -27,9 +27,9 @@ class	client {
 		/*###########################################
 		#				GETTERS						#
 		############################################*/
-		std::string getnick(void) const 			{return(this->nick);};
-		std::string getrealname_host(void) const 	{return(this->realname_host);};
-		std::string getusername_host(void) const 	{return(this->username_host);};
+		std::string getnick(void)			const	{return(this->nick);};
+		std::string getrealname_host(void)	const 	{return(this->realname_host);};
+		std::string getusername_host(void)	const 	{return(this->username_host);};
 
 };
 

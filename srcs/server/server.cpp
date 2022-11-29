@@ -16,14 +16,14 @@
 #include <vector>
 #include <sstream>
 
-server::server( void ) :  host(""), network_pass (""), network_port(""), port(""), password(""), status(true), current_size(0)
+server::server( void )
 {
 
   std::cout << "Default constructor called" << std::endl;
 
 }
 
-server::server( std::string network , std::string prt , std::string pass ) : host(""), network_pass(""), network_port (""), port(""), password(""), status(true), current_size(0)
+server::server( std::string network , std::string prt , std::string pass )
 {
     std::stringstream test(network);
     std::string segment;
@@ -34,12 +34,18 @@ server::server( std::string network , std::string prt , std::string pass ) : hos
 
     if (seglist.size() == 3)
     {
-		this->host          = seglist[0];
-		this->network_port  = seglist[1];
-		this->network_pass  = seglist[2];
+		this->serv_data.host          = seglist[0];
+		this->serv_data.network_port  = seglist[1];
+		this->serv_data.network_pass  = seglist[2];
     }
-    this->port          = prt;
-	this->password      = pass;
+	else
+	{
+		this->serv_data.network_port  = "";
+		this->serv_data.network_pass  = "";
+		this->serv_data.host          = "";
+	}
+    this->serv_data.port          = prt;
+	this->serv_data.password      = pass;
   std::cout << "Parameter constructor called" << std::endl;
 
 }
@@ -64,6 +70,7 @@ server & server::operator=(const server &tmp)
 
 std::ostream &operator<<(std::ostream& os, const server &tmp)
 {
+	std::cout << "Parameter constructor called - "<< &tmp << std::endl;
 	os << "Operator output called" << std::endl;
 	os << "host           |     " << tmp.get_host() << std::endl;
 	os << "network pass   |     " << tmp.get_network_pass() << std::endl;
@@ -109,16 +116,14 @@ bool	server::is_good_port(std::string port) const
 
 bool	server::check_data_correct(void) const
 {
-  if (this->host == "" || !this->is_good_host(this->host))
-    return (0);
-  if (this->network_pass == "")
-    return (0);
-  if (this->network_port == "" || !this->is_good_port(this->network_port))
-    return (0);
-  if (this->password == "")
-    return (0);
-  if (this->port == "" || !this->is_good_port(this->port))
-    return (0);
+	bool base[5] = { (this->serv_data.host == "" || !this->is_good_host(this->serv_data.host)) 					\
+					,(this->serv_data.network_pass == "")														\
+					,(this->serv_data.network_port == "" || !this->is_good_port(this->serv_data.network_port)) 	\
+					,(this->serv_data.password == "")															\
+					,(this->serv_data.port == "" || !this->is_good_port(this->serv_data.port))};
+	for (int i = 0; i < 5; i++)
+		if (base[i] == true)
+			return (0);
   return (1);
 }
 
@@ -141,23 +146,23 @@ int		server::server_listening(void)
 	sock_in	addr;
 	int		opt = 1;
 
-	if ((this->host_socket = socket(AF_INET, SOCK_STREAM, 0)) == -1)
+	if ((this->listening_socket = socket(AF_INET, SOCK_STREAM, 0)) == -1)
 		return 0;
 	// No sé que opciones tendremos que habilitar pero vamos a tener que usarlo
-	if (setsockopt(this->host_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1)
+	if (setsockopt(this->listening_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1)
 	{
 		perror("Bad socket ");
 		return 0;
 	}
-	addr = init_socket_struct(this->network_port, this->host);
+	addr = init_socket_struct(this->serv_data.network_port, this->serv_data.host);
 	// Asigna un nombre al socket; Asigna la info de address al socket
-	if (bind(this->host_socket, (const sock_addr*)&addr, sizeof(addr)) == -1)
+	if (bind(this->listening_socket, (const sock_addr*)&addr, sizeof(addr)) == -1)
 	{
 		perror("Error binding ");
 		return 0;
 	}
 	// Tenemos que definir un max_size para la cola
-	if (listen(this->host_socket, N_CLIENTS) == -1)
+	if (listen(this->listening_socket, N_CLIENTS) == -1)
 	{
 		perror("Can't hear you");
 		return 0;
@@ -166,132 +171,133 @@ int		server::server_listening(void)
 	return 1;
 }
 
-void	server::wait_for_msg(void)
-{
-	sock_in 	client;
-	socklen_t	cli_size;
-	char 		buff[4096];
-	int 		bytes_recieved;
-	
-	std::cout << "Espera a que llegue un cliente" << std::endl;
-	cli_size = sizeof(client);
-	if (accept(this->host_socket, (sock_addr *) &client, &cli_size) == -1)
-		std::cout << "Problem with client: "<< std::endl;
-	else
-	{
-		std::cout << "Una vez tiene el cliente escucha que quiere decir" << std::endl;
-		while (true)
-		{
-			memset(buff,0,4096);
-			bytes_recieved = recv(this->host_socket,buff,4096,0);
-			if ( bytes_recieved != -1)
-				std::cout << "Server : " << std::string(buff,bytes_recieved) << std::endl;
-		}
-	}
-}
-
 void server::fds_search_data(void) const
 {
-	std::cout << "- FDS STATUS -" << std::endl;
 	for (int i = 0;i < N_CLIENTS ; i++)
 		std::cout << "fds[" << i <<"]fd = "<< this->fds[i].fd <<" events = "<< this->fds[i].events << " revents = "<< this->fds[i].revents << std::endl;
 }
 
-int	server::start(void)
+int server::recieve_msg(Data_Running *run, int i)
 {
-	int		poll_result;
-	int		new_sd;
-	bool	close_connection;
-	bool	compress_array;
-	char 	buff[4096];
-	int		bytes_recieved;
-	int		n_active_fds;
-	int		len;
-
-	this->fds[0].fd 	= this->host_socket;
-  	this->fds[0].events = POLLIN;
-	compress_array 		= false;
-	n_active_fds = 1;
-	this->status = true;
-	std::cout << "El server empieza este infierno que llamo proyecto status ->(" << this->status<< ")"<< std::endl;
-	do
+	run->close_connection = false;
+	run->bytes_recieved = recv(fds[i].fd, run->buff, sizeof(run->buff), 0);
+	
+	if (run->bytes_recieved < 0)
 	{
-		poll_result = poll(this->fds, n_active_fds, TIMEOUT_MS);
-		// std::cout << "poll is  : " << poll_result << std::endl;
-		if (poll_result < 1) 	//Poll failed
-			break;
-		if (poll_result == 0) //Poll no result
-			break;
-		current_size = n_active_fds;
-		for (int i = 0; i < current_size;i++)
+		std::cout << "Error recv() failed " << std::endl;
+		run->close_connection = true;
+		return (0);
+	}
+	if (run->bytes_recieved == 0)
+	{
+		std::cout << "Connection closed "<< std::endl;
+		run->close_connection = true;
+		return (0);;
+	}
+	run->len = run->bytes_recieved;
+	std::cout << "MSG["<< i <<"] : "<< std::string(run->buff,run->bytes_recieved) << std::endl;
+	// bytes_recieved = send(fds[i].fd, buff, len, 0);
+	// bytes_recieved = send(fds[i].fd,   "<client> :Welcome to the <networkname> Network, miguel[!<mortiz-d>@<host>]", len, 0);
+	run->bytes_recieved = send(fds[i].fd, run->buff, run->len, 0);
+	if (run->bytes_recieved < 0)
+	{
+		std::cout << "Error send() failed " << std::endl;
+		run->close_connection = true;
+		return (0);;
+	}
+	if (run->close_connection == true)
+	{
+		close(this->fds[i].fd);
+		this->fds[i].fd = -1;
+    		run->compress_array = true;
+	}
+	return (1);
+}
+
+int	server::accept_client(Data_Running *run)
+{
+	run->new_sd = accept(this->listening_socket, NULL, NULL);
+	if (run->new_sd < 0)
+	{
+		std::cout << "Error accept failed " << std::endl;
+		run->status = false;
+		return (0);
+	}
+	fds[run->n_active_fds].fd = this->listening_socket;
+	fds[run->n_active_fds].events = POLL_IN;
+	fds[run->n_active_fds - 1].fd = run->new_sd;
+	fds[run->n_active_fds - 1].events = POLLIN;
+	std::cout << "Tenemos un nuevo cliente connectado ... en el slot "<< run->n_active_fds << "new_sd = "<< run->new_sd<< std::endl;
+	run->n_active_fds++;
+	fds_search_data();
+	return (1);
+}
+
+void	server::search_fds(Data_Running *run)
+{
+	for (int i = 0; i < run->current_size;i++)
+	{
+		if (this->fds[i].revents == 0)
+			continue;
+		if(fds[i].revents != POLLIN)
 		{
-			if (this->fds[i].revents == 0)
-				continue;
-			if(fds[i].revents != POLLIN)
-			{
-				std::cout << "Error revent is  : " << fds[i].revents << std::endl;
-				this->status = false;
+			std::cout << "Error revent is  : " << fds[i].revents << std::endl;
+			run->status = false;
+			break;
+		}
+		if (fds[i].fd == this->listening_socket && run->n_active_fds < N_CLIENTS)
+     	{
+			//Aceptamos el cliente
+			if (!this->accept_client(run))
 				break;
-			}
-			if (fds[i].fd == this->host_socket && n_active_fds < N_CLIENTS)
-      		{
-				new_sd = accept(this->host_socket, NULL, NULL);
-				if (new_sd < 0)
-				{
-					std::cout << "Error accept failed " << std::endl;
-					this->status = false;
-					break;
-				}
-				fds[n_active_fds].fd = this->host_socket;
-				fds[n_active_fds].events = POLL_IN;
-				fds[n_active_fds - 1].fd = new_sd;
-				fds[n_active_fds - 1].events = POLLIN;
-				std::cout << "Tenemos un nuevo cliente connectado ... en el slot "<< n_active_fds << "new_sd = "<< new_sd<< std::endl;
-				n_active_fds++;
-				fds_search_data();
-			}
-			else
-			{
-				close_connection = false;
-				bytes_recieved = recv(fds[i].fd, buff, sizeof(buff), 0);
-				
-				if (bytes_recieved < 0)
-				{
-					if (errno != EWOULDBLOCK)
-					{
-						std::cout << "Error recv() failed " << std::endl;
-						close_connection = true;
-					}
-					break;
-				}
-				if (bytes_recieved == 0)
-				{
-					std::cout << "Connection closed "<< std::endl;
-					close_connection = true;
-					break;
-				}
-				len = bytes_recieved;
-				std::cout << "MSG["<< i <<"] : "<< std::string(buff,bytes_recieved) << std::endl;
-				// bytes_recieved = send(fds[i].fd, buff, len, 0);
-				// bytes_recieved = send(fds[i].fd,   "<client> :Welcome to the <networkname> Network, miguel[!<mortiz-d>@<host>]", len, 0);
-				bytes_recieved = send(fds[i].fd, buff, len, 0);
-				if (bytes_recieved < 0)
-				{
-					std::cout << "Error send() failed " << std::endl;
-					close_connection = true;
-					break;
-				}
-				fds_search_data();
-				if (close_connection == true)
-				{
-					close(this->fds[i].fd);
-					this->fds[i].fd = -1;
-          			compress_array = true;
-				}
-			}
+		}
+		else
+		{
+			//Recibimos el mensaje
+			if(!recieve_msg(run,i))
+				break;
 		}
 	}
-	while (this->status);
+	return;
+}
+
+int	server::start(void)
+{
+	struct Data_Running *serv_run;
+
+	this->fds[0].fd 	= this->listening_socket;
+  	this->fds[0].events = POLLIN;
+	serv_run = (Data_Running *)calloc(sizeof(Data_Running), 1);
+	serv_run->compress_array = false;
+	serv_run->current_size = 0;
+	serv_run->n_active_fds = 1;
+	serv_run->status = true;
+	std::cout << "El server empieza este infierno que llamo proyecto status ->(" << serv_run->status<< ")"<< std::endl;
+	do
+	{
+		serv_run->poll_result = poll(this->fds, serv_run->n_active_fds, TIMEOUT_MS);
+		// std::cout << "poll is  : " << poll_result << std::endl;
+		if (serv_run->poll_result < 0) 	//Poll failed
+		{
+			std::cout << "Poll failed ... breaking server " << std::endl;
+			break;
+		}	
+		if (serv_run->poll_result == 0) //Poll no result/time out
+		{
+			std::cout << "TIME_OUT ERROR ... breaking server " << std::endl;
+			break;
+		}	
+		serv_run->current_size = serv_run->n_active_fds;
+		this->search_fds(serv_run);
+	}
+	while (serv_run->status);
+	
+	for (int i = 0; i < serv_run->n_active_fds; i++)
+	{
+		if(fds[i].fd >= 0)
+		close(fds[i].fd);
+	}
+	delete serv_run;
 	return (0);
 }
 
@@ -306,7 +312,7 @@ int	server::start(void)
 // 	int		bytes_recieved;
 // 	int		n_active_fds;
 
-// 	this->fds[0].fd 	= this->host_socket;
+// 	this->fds[0].fd 	= this->listening_socket;
 //   	this->fds[0].events = POLLIN;
 // 	compress_array 		= false;
 // 	n_active_fds = 1;
@@ -331,7 +337,7 @@ int	server::start(void)
 // 				this->status = false;
 // 				break;
 // 			}
-// 			if (fds[i].fd == this->host_socket)
+// 			if (fds[i].fd == this->listening_socket)
 //       		{
 // 				if (n_active_fds >= N_CLIENTS)
 // 				{
@@ -339,7 +345,7 @@ int	server::start(void)
 // 					break;
 // 				}
 
-// 				new_sd = accept(this->host_socket, NULL, NULL);
+// 				new_sd = accept(this->listening_socket, NULL, NULL);
 // 				if (new_sd < 0)
 // 				{
 // 					if (errno != EWOULDBLOCK)

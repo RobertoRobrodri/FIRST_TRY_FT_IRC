@@ -16,33 +16,56 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 
+struct Data_Server {             //Struct para almacenar los datos del servidor
+	std::string host;
+	std::string network_pass;
+	std::string network_port;
+	std::string port;
+	std::string password;   
+}; 
+
+struct Data_Running {             //Struct para almacenar los datos que debe tener el servidor activo
+	bool		status;
+	int			current_size;
+	int			poll_result;
+	int			new_sd;
+	bool		close_connection;
+	bool		compress_array;
+	char 		buff[4096];
+	int			bytes_recieved;
+	int			n_active_fds;
+	int			len;
+}; 
+
 class	server {
 
 	private:
 
-//		pollfd		fds[N_CLIENTS];
-		client		clients[N_CLIENTS];
-		int			host_socket;
-		std::string host;
-		std::string network_pass;
-		std::string network_port;
-		std::string port;
-		std::string password;
-		bool		status;
-		int			current_size;
+		pollfd				fds[N_CLIENTS];
+		client				clients[N_CLIENTS];
+		int					listening_socket;
+		struct Data_Server 	serv_data;
 
+
+		/*###########################################
+		#			CLOSED    	FUNCTIONS			#
+		############################################*/
 		server	( void );
+
 		/*###########################################
 		#			PRIVATE    	FUNCTIONS			#
 		############################################*/
-		bool	is_good_port(std::string port) const;
-		bool	is_good_host(std::string host) const;
-
+		bool	is_good_port	(std::string port) const;
+		bool	is_good_host	(std::string host) const;
+		void	search_fds		(Data_Running *run);
+		int		accept_client	(Data_Running *run);
+		int		recieve_msg		(Data_Running *run, int i);
 
 		/*###########################################
 		#			DEBUG    	FUNCTIONS			#
 		############################################*/
 		void fds_search_data(void) const;
+
 	public:
 
 		server	( std::string network , std::string prt , std::string pass );
@@ -53,19 +76,18 @@ class	server {
 		/*###########################################
 		#				GETTERS						#
 		############################################*/
-		std::string get_host(void) const 			{return(this->host);};
-		std::string get_network_pass(void) const 	{return(this->network_pass);};
-		std::string get_network_port(void) const 	{return(this->network_port);};
-		std::string get_port(void) const 			{return(this->port);};
-		std::string get_password(void) const 		{return(this->password);};
+		std::string get_host(void) const 			{return(this->serv_data.host);};
+		std::string get_network_pass(void) const 	{return(this->serv_data.network_pass);};
+		std::string get_network_port(void) const 	{return(this->serv_data.network_port);};
+		std::string get_port(void) const 			{return(this->serv_data.port);};
+		std::string get_password(void) const 		{return(this->serv_data.password);};
 
 		/*###########################################
 		#			PUBLIC	FUNCTIONS				#
 		############################################*/
-		bool	check_data_correct(void) const;
-		int		start(void);
-		int		server_listening(void);
-		void	wait_for_msg(void); //Innecesario pero escucha un cliente (ahira toca con multiples)
+		bool	check_data_correct	(void) const;
+		int		start				(void);
+		int		server_listening	(void);
 };
 
 std::ostream &operator<<(std::ostream& os, const server &tmp);
