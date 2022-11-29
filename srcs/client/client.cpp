@@ -14,13 +14,12 @@
 
 client::client( void ) : realname_host(""), username_host(""), nick("")
 {
-  std::cout << "Default Client constructor called" << std::endl;
+  return ;
 }
 
 client::client( std::string rh, std::string uh, std::string ni) : realname_host(rh), username_host(uh), nick(ni)
 {
-  std::cout << "Parameter Client constructor called" << std::endl;
-
+  return ;
 }
 
 client::client( const client & var ) {
@@ -29,10 +28,9 @@ client::client( const client & var ) {
 
 }
 
-client::~client( void ) {
-
-  std::cout << "Destructor constructor called" << std::endl;
-
+client::~client( void ) 
+{
+  return ;
 }
 
 client &client::operator=(const client &tmp)

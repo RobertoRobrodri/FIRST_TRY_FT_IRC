@@ -5,8 +5,6 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
-#define N_CLIENTS 5+1			//Numero de Clientes (fd) + el fd del host
-#define TIMEOUT_MS 3*1000*60 	//Tiempo de desconexion en caso de no recivir nada
 
 class	client {
 

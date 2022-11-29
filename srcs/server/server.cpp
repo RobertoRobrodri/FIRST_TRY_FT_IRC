@@ -18,9 +18,7 @@
 
 server::server( void )
 {
-
-  std::cout << "Default constructor called" << std::endl;
-
+  return ;
 }
 
 server::server( std::string network , std::string prt , std::string pass )
@@ -46,8 +44,7 @@ server::server( std::string network , std::string prt , std::string pass )
 	}
     this->serv_data.port          = prt;
 	this->serv_data.password      = pass;
-  std::cout << "Parameter constructor called" << std::endl;
-
+  return ;
 }
 
 server::server( const server & var )
@@ -70,7 +67,7 @@ server & server::operator=(const server &tmp)
 
 std::ostream &operator<<(std::ostream& os, const server &tmp)
 {
-	std::cout << "Parameter constructor called - "<< &tmp << std::endl;
+	std::cout << "Parameter Server called - "<< &tmp << std::endl;
 	os << "Operator output called" << std::endl;
 	os << "host           |     " << tmp.get_host() << std::endl;
 	os << "network pass   |     " << tmp.get_network_pass() << std::endl;
@@ -195,9 +192,9 @@ int server::recieve_msg(Data_Running *run, int i)
 		return (0);;
 	}
 	run->len = run->bytes_recieved;
-	std::cout << "MSG["<< i <<"] : "<< std::string(run->buff,run->bytes_recieved) << std::endl;
+	// std::cout << "MSG["<< i <<"] : "<< std::string(run->buff,run->bytes_recieved) << std::endl;
 	// bytes_recieved = send(fds[i].fd, buff, len, 0);
-	// bytes_recieved = send(fds[i].fd,   "<client> :Welcome to the <networkname> Network, miguel[!<mortiz-d>@<host>]", len, 0);
+	run->bytes_recieved = send(fds[i].fd,   "127.0.0.1 : Pegame un tiro por dios", 27, 0);
 	run->bytes_recieved = send(fds[i].fd, run->buff, run->len, 0);
 	if (run->bytes_recieved < 0)
 	{
@@ -211,6 +208,20 @@ int server::recieve_msg(Data_Running *run, int i)
 		this->fds[i].fd = -1;
     		run->compress_array = true;
 	}
+	if (run->compress_array == true)
+	{
+		run->compress_array = false;
+		for (int x = 0; x < run->n_active_fds; x++)
+		{
+			if (fds[x].fd == -1)
+			{
+				for(int j = x; j < run->n_active_fds; j++)
+					fds[j].fd = fds[j+1].fd;
+				x--;
+				run->n_active_fds--;
+			}
+		}
+	}
 	return (1);
 }
 
@@ -223,13 +234,24 @@ int	server::accept_client(Data_Running *run)
 		run->status = false;
 		return (0);
 	}
-	fds[run->n_active_fds].fd = this->listening_socket;
-	fds[run->n_active_fds].events = POLL_IN;
-	fds[run->n_active_fds - 1].fd = run->new_sd;
-	fds[run->n_active_fds - 1].events = POLLIN;
-	std::cout << "Tenemos un nuevo cliente connectado ... en el slot "<< run->n_active_fds << "new_sd = "<< run->new_sd<< std::endl;
-	run->n_active_fds++;
-	fds_search_data();
+	if (run->n_active_fds >= N_CLIENTS)
+	{
+		std::cout << "Error to many clients " << std::endl;
+		run->bytes_recieved = recv(run->new_sd, run->buff, sizeof(run->buff), 0);
+		run->len = run->bytes_recieved;
+		std::cout << "CLIENT REJECTED : "<< std::endl << std::string(run->buff,run->bytes_recieved) << std::endl;
+
+	}
+	else
+	{
+		fds[run->n_active_fds].fd = this->listening_socket;
+		fds[run->n_active_fds].events = POLL_IN;
+		fds[run->n_active_fds - 1].fd = run->new_sd;
+		fds[run->n_active_fds - 1].events = POLLIN;
+		std::cout << "Tenemos un nuevo cliente connectado ... en el slot "<< run->n_active_fds << "new_sd = "<< run->new_sd<< std::endl;
+		run->n_active_fds++;
+		fds_search_data();
+	}
 	return (1);
 }
 
@@ -245,7 +267,7 @@ void	server::search_fds(Data_Running *run)
 			run->status = false;
 			break;
 		}
-		if (fds[i].fd == this->listening_socket && run->n_active_fds < N_CLIENTS)
+		if (fds[i].fd == this->listening_socket) // && run->n_active_fds < N_CLIENTS
      	{
 			//Aceptamos el cliente
 			if (!this->accept_client(run))
