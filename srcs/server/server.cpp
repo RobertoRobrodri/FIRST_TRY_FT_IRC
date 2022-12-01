@@ -67,7 +67,7 @@ server & server::operator=(const server &tmp)
 
 std::ostream &operator<<(std::ostream& os, const server &tmp)
 {
-	std::cout << "Parameter Server called - "<< &tmp << std::endl;
+	os << "Parameter Server called - "<< &tmp << std::endl;
 	os << "Operator output called" << std::endl;
 	os << "host           |     " << tmp.get_host() << std::endl;
 	os << "network pass   |     " << tmp.get_network_pass() << std::endl;
@@ -174,53 +174,70 @@ void server::fds_search_data(void) const
 		std::cout << "fds[" << i <<"]fd = "<< this->fds[i].fd <<" events = "<< this->fds[i].events << " revents = "<< this->fds[i].revents << std::endl;
 }
 
+int	server::close_fds_client(int i, Data_Running *run)
+{
+	close(this->fds[i].fd);
+	this->fds[i].fd = -1;
+	for (int x = 0; x < run->n_active_fds; x++)
+	{
+		if (fds[x].fd == -1)
+		{
+			for(int j = x; j < run->n_active_fds; j++)
+				fds[j].fd = fds[j+1].fd;
+			x--;
+			run->n_active_fds--;
+		}
+	}
+	std::cout << "CLIENT["<< i <<"] left the server..." << std::endl;
+	return (1);
+}
+
+int server::msg_to_all(int i)
+{
+
+	for (int j = 0; j < N_CLIENTS; j++)
+	{
+		if (j == i)
+			continue;
+		if (fds[j].fd == this->listening_socket)
+			break;
+		if (!this->msg.send_message(fds[j].fd, this->msg.get_message().c_str()))
+			return (0);
+	}
+	return (1);
+}
+
 int server::recieve_msg(Data_Running *run, int i)
 {
 	run->close_connection = false;
-	run->bytes_recieved = recv(fds[i].fd, run->buff, sizeof(run->buff), 0);
-	
-	if (run->bytes_recieved < 0)
+
+	//Recibimos el mensaje
+	if (!this->msg.recv_message(fds[i].fd))
 	{
-		std::cout << "Error recv() failed " << std::endl;
 		run->close_connection = true;
 		return (0);
 	}
-	if (run->bytes_recieved == 0)
+	//Procesamos el mensaje
+	this->msg.set_message("CLIENT["+std::to_string(i)+"] :"+this->msg.get_message());
+	//Mostramos el mensaje en el servidor
+	std::cout << msg;
+	//Mandamos el mensaje a los demas clientes
+	if (!this->msg_to_all(i))
 	{
-		std::cout << "Connection closed "<< std::endl;
 		run->close_connection = true;
-		return (0);;
+		return (0);
 	}
-	run->len = run->bytes_recieved;
-	// std::cout << "MSG["<< i <<"] : "<< std::string(run->buff,run->bytes_recieved) << std::endl;
-	// bytes_recieved = send(fds[i].fd, buff, len, 0);
-	run->bytes_recieved = send(fds[i].fd,   "127.0.0.1 : Pegame un tiro por dios", 27, 0);
-	run->bytes_recieved = send(fds[i].fd, run->buff, run->len, 0);
-	if (run->bytes_recieved < 0)
-	{
-		std::cout << "Error send() failed " << std::endl;
-		run->close_connection = true;
-		return (0);;
-	}
+	//Mandamos una confirmaion al cliente de vuelta
+	// if (!this->msg.send_message(fds[i].fd,"mensaje recibido\n"))
+	// {
+	// 	run->close_connection = true;
+	// 	return (0);
+	// }
+
 	if (run->close_connection == true)
 	{
-		close(this->fds[i].fd);
-		this->fds[i].fd = -1;
-    		run->compress_array = true;
-	}
-	if (run->compress_array == true)
-	{
-		run->compress_array = false;
-		for (int x = 0; x < run->n_active_fds; x++)
-		{
-			if (fds[x].fd == -1)
-			{
-				for(int j = x; j < run->n_active_fds; j++)
-					fds[j].fd = fds[j+1].fd;
-				x--;
-				run->n_active_fds--;
-			}
-		}
+		std::cout << "Un error inesperado cerro la conexion del cliente... "<< i << std::endl;
+		this->close_fds_client(i, run);
 	}
 	return (1);
 }
@@ -236,11 +253,9 @@ int	server::accept_client(Data_Running *run)
 	}
 	if (run->n_active_fds >= N_CLIENTS)
 	{
-		std::cout << "Error to many clients " << std::endl;
-		run->bytes_recieved = recv(run->new_sd, run->buff, sizeof(run->buff), 0);
-		run->len = run->bytes_recieved;
-		std::cout << "CLIENT REJECTED : "<< std::endl << std::string(run->buff,run->bytes_recieved) << std::endl;
-
+		std::cout << "CLIENT REJECTED - Error to many clients "<< std::endl;
+		msg.send_message(run->new_sd,"Cliente rechazado... demasiados clientes\n");
+		close(run->new_sd);
 	}
 	else
 	{
@@ -248,10 +263,11 @@ int	server::accept_client(Data_Running *run)
 		fds[run->n_active_fds].events = POLL_IN;
 		fds[run->n_active_fds - 1].fd = run->new_sd;
 		fds[run->n_active_fds - 1].events = POLLIN;
-		std::cout << "Tenemos un nuevo cliente connectado ... en el slot "<< run->n_active_fds << "new_sd = "<< run->new_sd<< std::endl;
+		std::cout << "Tenemos un nuevo cliente connectado ... hay un total de -> "<< run->n_active_fds << std::endl;
 		run->n_active_fds++;
-		fds_search_data();
+		// fds_search_data();
 	}
+	msg.clear_message();
 	return (1);
 }
 
@@ -259,9 +275,9 @@ void	server::search_fds(Data_Running *run)
 {
 	for (int i = 0; i < run->current_size;i++)
 	{
-		if (this->fds[i].revents == 0)
+		if (this->fds[i].revents ==  0)
 			continue;
-		if(fds[i].revents != POLLIN)
+		if(fds[i].revents != POLLIN && fds[i].revents != 17)
 		{
 			std::cout << "Error revent is  : " << fds[i].revents << std::endl;
 			run->status = false;
@@ -273,11 +289,20 @@ void	server::search_fds(Data_Running *run)
 			if (!this->accept_client(run))
 				break;
 		}
-		else
+		else if(fds[i].revents != 17)
 		{
 			//Recibimos el mensaje
 			if(!recieve_msg(run,i))
+			{
+				msg.clear_message();
 				break;
+			}
+		}
+		else
+		{
+			//Corte de conexion
+			std::cout << "Cerramos connexion" << std::endl;
+			this->close_fds_client(i, run);
 		}
 	}
 	return;
@@ -294,11 +319,10 @@ int	server::start(void)
 	serv_run->current_size = 0;
 	serv_run->n_active_fds = 1;
 	serv_run->status = true;
-	std::cout << "El server empieza este infierno que llamo proyecto status ->(" << serv_run->status<< ")"<< std::endl;
+	
 	do
 	{
 		serv_run->poll_result = poll(this->fds, serv_run->n_active_fds, TIMEOUT_MS);
-		// std::cout << "poll is  : " << poll_result << std::endl;
 		if (serv_run->poll_result < 0) 	//Poll failed
 		{
 			std::cout << "Poll failed ... breaking server " << std::endl;
@@ -322,105 +346,6 @@ int	server::start(void)
 	delete serv_run;
 	return (0);
 }
-
-
-// int	server::start(void)
-// {
-// 	int		poll_result;
-// 	int		new_sd;
-// 	bool	close_connection;
-// 	bool	compress_array;
-// 	char 	buff[4096];
-// 	int		bytes_recieved;
-// 	int		n_active_fds;
-
-// 	this->fds[0].fd 	= this->listening_socket;
-//   	this->fds[0].events = POLLIN;
-// 	compress_array 		= false;
-// 	n_active_fds = 1;
-// 	this->status = true;
-// 	std::cout << "El server empieza este infierno que llamo proyecto status ->(" << this->status<< ")"<< std::endl;
-// 	do
-// 	{
-// 		poll_result = poll(this->fds, n_active_fds, TIMEOUT_MS);
-// 		std::cout << "poll is  : " << poll_result << std::endl;
-// 		if (poll_result < 1) 	//Poll failed
-// 			break;
-// 		if 	(poll_result == 0) //Poll no result
-// 			break;
-// 		current_size = n_active_fds;
-// 		for (int i = 0; i < current_size;i++)
-// 		{
-// 			if (this->fds[i].revents == 0)
-// 				continue;
-// 			if(fds[i].revents != POLLIN)
-// 			{
-// 				std::cout << "Error revent is  : " << fds[i].revents << std::endl;
-// 				this->status = false;
-// 				break;
-// 			}
-// 			if (fds[i].fd == this->listening_socket)
-//       		{
-// 				if (n_active_fds >= N_CLIENTS)
-// 				{
-// 					std::cout << "Connection rejected ... al fds are taken " << std::endl;
-// 					break;
-// 				}
-
-// 				new_sd = accept(this->listening_socket, NULL, NULL);
-// 				if (new_sd < 0)
-// 				{
-// 					if (errno != EWOULDBLOCK)
-// 					{
-// 						std::cout << "Error accept failed " << std::endl;
-// 						this->status = false;
-// 					}
-// 					break;
-// 				}
-// 				fds[n_active_fds].fd = new_sd;
-// 				fds[n_active_fds].events = POLLIN;
-// 				std::cout << "Tenemos un nuevo cliente connectado ... en el slot "<< n_active_fds << "new_sd = "<< new_sd<< std::endl;
-// 				n_active_fds++;
-// 				fds_search_data(N_CLIENTS,this->fds);
-// 			}
-// 			else
-// 			{
-// 				close_connection = false;
-// 				bytes_recieved = recv(fds[i].fd, buff, sizeof(buff), 0);
-				
-// 				if (bytes_recieved < 0)
-// 				{
-// 					if (errno != EWOULDBLOCK)
-// 					{
-// 						std::cout << "Error recv() failed " << std::endl;
-// 						close_connection = true;
-// 					}
-// 					break;
-// 				}
-// 				if (bytes_recieved == 0)
-// 				{
-// 					std::cout << "Connection closed "<< std::endl;
-// 					close_connection = true;
-// 					break;
-// 				}
-// 				std::cout << "MSG["<< i <<"] : "<< std::string(buff,bytes_recieved) << std::endl;
-// 				this->fds[i].events = 0 ;
-
-// 				if (close_connection == true)
-// 				{
-// 					close(this->fds[i].fd);
-// 					this->fds[i].fd = -1;
-//           			compress_array = true;
-// 				}
-// 			}
-			
-			
-// 		}
-// 		// std::cout << "Damos una vuelta ... status -> "<< this->status << std::endl;
-// 	}
-// 	while (this->status);
-// 	return (0);
-// }
 
 // if (compress_array == true)
 // 			{

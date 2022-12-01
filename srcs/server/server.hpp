@@ -7,6 +7,7 @@
 #define TIMEOUT_MS 10*1000*60 	//Tiempo de desconexion en caso de no recivir nada
 
 #include "../client/client.hpp"
+#include "../msg/msg.hpp"
 #include <poll.h>
 #include <string>
 #include <iostream>
@@ -31,10 +32,7 @@ struct Data_Running {             //Struct para almacenar los datos que debe ten
 	int			new_sd;
 	bool		close_connection;
 	bool		compress_array;
-	char 		buff[4096];
-	int			bytes_recieved;
 	int			n_active_fds;
-	int			len;
 }; 
 
 class	server {
@@ -43,6 +41,7 @@ class	server {
 
 		pollfd				fds[N_CLIENTS];
 		client				clients[N_CLIENTS];
+		msg					msg;
 		int					listening_socket;
 		struct Data_Server 	serv_data;
 
@@ -60,6 +59,8 @@ class	server {
 		void	search_fds		(Data_Running *run);
 		int		accept_client	(Data_Running *run);
 		int		recieve_msg		(Data_Running *run, int i);
+		int		msg_to_all		(int i);
+		int		close_fds_client(int i, Data_Running *run);
 
 		/*###########################################
 		#			DEBUG    	FUNCTIONS			#
