@@ -106,7 +106,7 @@ bool	server::is_good_port(std::string port) const
   port_i = atoi(port.c_str());
   if (port != std::to_string(port_i))
     return(0);
-  if (port_i < 6000 /*|| port_i > 7000*/) // What about 80 and 8080 port????????
+  if (port_i < 6000 || port_i > 7000)
     return (0);
   return (1);
 }

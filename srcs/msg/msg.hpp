@@ -27,7 +27,7 @@ class	msg {
 	############################################*/
 	void 	clear_message	(void);
 	int		recv_message	(int fd);
-	int		send_message	(int fd, const char *str);
+	int		send_message	(int fd, const std::string str);
 
 	/*###########################################
 	#				GETTERS						#

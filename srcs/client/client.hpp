@@ -13,9 +13,6 @@ class	client {
 		std::string username_host;
 		std::string nick;
 	public:
-
-		//pollfd		fds[N_CLIENTS];
-
 		client ( void );
 		client ( std::string rh, std::string uh, std::string ni);
 		client ( const client & var );

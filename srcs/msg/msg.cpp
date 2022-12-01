@@ -12,13 +12,14 @@
 
 #include "msg.hpp"
 
-int ft_len(const char *str)
+ // WTF al menos llama a strlen
+/*int ft_len(const char *str)
 {
   int i = 0;
   while (str[i] != '\0')
     i++;
   return (i);
-}
+}*/
 
 msg::msg( void ) : message(""), bytes_recieved (0)
 {
@@ -75,12 +76,9 @@ int msg::recv_message(int fd)
   return (1);
 }
 
-int msg::send_message(int fd, const char *str)
+int msg::send_message(int fd, const std::string str)
 {
-  int result;
-
-	result = send(fd, str, ft_len(str), 0);
-	if (result < 0)
+	if (send(fd, str.c_str(), str.size(), 0) < 0)
 	{
 		std::cout << "Error send() failed " << std::endl;
 		return (0);

@@ -17,15 +17,15 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 
-struct Data_Server {             //Struct para almacenar los datos del servidor
+typedef struct Data_Server {             //Struct para almacenar los datos del servidor
 	std::string host;
 	std::string network_pass;
 	std::string network_port;
 	std::string port;
 	std::string password;   
-}; 
+} data_server;
 
-struct Data_Running {             //Struct para almacenar los datos que debe tener el servidor activo
+typedef struct Data_Running {             //Struct para almacenar los datos que debe tener el servidor activo
 	bool		status;
 	int			current_size;
 	int			poll_result;
@@ -33,7 +33,7 @@ struct Data_Running {             //Struct para almacenar los datos que debe ten
 	bool		close_connection;
 	bool		compress_array;
 	int			n_active_fds;
-}; 
+} data_Running; 
 
 class	server {
 
