@@ -76,12 +76,36 @@ fclean: clean tclean
 re: fclean all
 
 test:
-	mkdir -p $(TEST_PATH)
-	Ln -sf	$(PWD)/$(SRC_PATH)/$(SUBFILE1_PATH) $(PWD)/$(TEST_PATH)/
-	@echo "int main(int argc, char **argv)" >> $(PWD)/$(TEST_PATH)/$(SUBFILE1_PATH)/main.cpp
-	@echo "{" >> $(PWD)/$(TEST_PATH)/$(SUBFILE1_PATH)/main.cpp
-	@echo "return (0);" >> $(PWD)/$(TEST_PATH)/$(SUBFILE1_PATH)/main.cpp
-	@echo "}" >> $(PWD)/$(TEST_PATH)/$(SUBFILE1_PATH)/main.cpp
+	@echo "##################################################################################"
+	@echo "#                         Generating test folder                                 #"
+	@echo "##################################################################################"
+	@mkdir -p $(TEST_PATH)
+	@for FILE in $(SRC_PATH)/* ; do ln -sf $(PWD)/$(SRC_PATH)/* $(PWD)/$(TEST_PATH)/$(basename($$FILE)) ; done;
+	@if [ ! -f "$(TEST_PATH)/main.cpp" ]; then \
+		echo "int main(int argc, char **argv)" >> $(PWD)/$(TEST_PATH)/main.cpp \
+		echo "{" >> $(PWD)/$(TEST_PATH)/main.cpp \
+		echo "return (0);" >> $(PWD)/$(TEST_PATH)/main.cpp \
+		echo "}" >> $(PWD)/$(TEST_PATH)/main.cpp ;\
+	fi
+	@echo "⠀⠀⠀	    ⣠⣴⣶⣿⣿⣷⣶⣄⣀⣀\n\
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⣰⣾⣿⣿⡿⢿⣿⣿⣿⣿⣿⣿⣿⣷⣦⡀⠀⠀⠀⠀⠀\n\
+⠀⠀⠀⠀⠀⠀⠀⢀⣾⣿⣿⡟⠁⣰⣿⣿⣿⡿⠿⠻⠿⣿⣿⣿⣿⣧⠀⠀⠀⠀\n\
+⠀⠀⠀⠀⠀⠀⠀⣾⣿⣿⠏⠀⣴⣿⣿⣿⠉⠀⠀⠀⠀⠀⠈⢻⣿⣿⣇⠀⠀⠀\n\
+⠀⠀⠀⠀⢀⣠⣼⣿⣿⡏⠀⢠⣿⣿⣿⠇⠀⠀⠀⠀⠀⠀⠀⠈⣿⣿⣿⡀⠀⠀\n\
+⠀⠀⠀⣰⣿⣿⣿⣿⣿⡇⠀⢸⣿⣿⣿⡀⠀⠀⠀⠀⠀⠀⠀⠀⣿⣿⣿⡇⠀⠀\n\
+⠀⠀⢰⣿⣿⡿⣿⣿⣿⡇⠀⠘⣿⣿⣿⣧⠀⠀⠀⠀⠀⠀⢀⣸⣿⣿⣿⠁⠀⠀\n\
+⠀⠀⣿⣿⣿⠁⣿⣿⣿⡇⠀⠀⠻⣿⣿⣿⣷⣶⣶⣶⣶⣶⣿⣿⣿⣿⠃⠀⠀⠀\n\
+⠀⢰⣿⣿⡇⠀⣿⣿⣿⠀⠀⠀⠀⠈⠻⣿⣿⣿⣿⣿⣿⣿⣿⣿⠟⠁⠀⠀⠀⠀\n\
+⠀⢸⣿⣿⡇⠀⣿⣿⣿⠀⠀⠀⠀⠀⠀⠀⠉⠛⠛⠛⠉⢉⣿⣿⠀⠀⠀⠀⠀⠀\n\
+⠀⢸⣿⣿⣇⠀⣿⣿⣿⠀⠀⠀⠀⠀⢀⣤⣤⣤⡀⠀⠀⢸⣿⣿⣿⣷⣦⠀⠀⠀\n\
+⠀⠀⢻⣿⣿⣶⣿⣿⣿⠀⠀⠀⠀⠀⠈⠻⣿⣿⣿⣦⡀⠀⠉⠉⠻⣿⣿⡇⠀⠀\n\
+⠀⠀⠀⠛⠿⣿⣿⣿⣿⣷⣤⡀⠀⠀⠀⠀⠈⠹⣿⣿⣇⣀⠀⣠⣾⣿⣿⡇⠀⠀\n\
+⠀⠀⠀⠀⠀⠀⠀⠹⣿⣿⣿⣿⣦⣤⣤⣤⣤⣾⣿⣿⣿⣿⣿⣿⣿⣿⡟⠀⠀⠀\n\
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠻⢿⣿⣿⣿⣿⣿⣿⠿⠋⠉⠛⠋⠉⠉⠁⠀⠀⠀⠀\n\
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠉⠉⠉⠁\n"
+	@echo "##################################################################################"
+	@echo "#               Test ready pls edit main.cpp with you own test                   #"
+	@echo "##################################################################################"
 
 tclean:
 	rm -rf $(TEST_PATH)
