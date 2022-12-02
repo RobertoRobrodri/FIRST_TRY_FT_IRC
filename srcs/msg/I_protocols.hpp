@@ -1,18 +1,18 @@
-#ifndef IPROTOCOLS_HPP
-#define IPROTOCOLS_HPP
+#ifndef I_PROTOCOLS_HPP
+#define I_PROTOCOLS_HPP
 
 #include "../general/general.hpp"
 #include "msg.hpp"
 
 class	msg;
 
-class	Iprotocols {
+class	I_protocols {
 
 	private:
 
 	public:
 
-		virtual ~Iprotocols (void){};
+		virtual ~I_protocols (void){};
 		virtual void welcome_client	(int fd) = 0;
 		
 };

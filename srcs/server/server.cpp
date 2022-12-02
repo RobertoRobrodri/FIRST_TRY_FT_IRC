@@ -11,10 +11,10 @@
 /* ************************************************************************** */
 
 #include "server.hpp"
-#include <unistd.h>
-#include <string>
-#include <vector>
-#include <sstream>
+
+/*###########################################
+#			CONSTRUCTOR						#
+############################################*/
 
 server::server( void )
 {
@@ -23,27 +23,16 @@ server::server( void )
 
 server::server( std::string network , std::string prt , std::string pass )
 {
-    std::stringstream test(network);
-    std::string segment;
-    std::vector <std::string>seglist;
+    std::stringstream 			test(network);
+    std::string 				segment;
+    std::vector <std::string>	seglist;
 
     while (std::getline(test,segment,':'))
-      seglist.push_back(segment);
-
+    	seglist.push_back(segment);
     if (seglist.size() == 3)
-    {
-		this->serv_data.host          = seglist[0];
-		this->serv_data.network_port  = seglist[1];
-		this->serv_data.network_pass  = seglist[2];
-    }
+		this->serv_data = (data_server) {seglist[0], seglist[1], seglist[2], prt, pass};
 	else
-	{
-		this->serv_data.network_port  = "";
-		this->serv_data.network_pass  = "";
-		this->serv_data.host          = "";
-	}
-    this->serv_data.port          = prt;
-	this->serv_data.password      = pass;
+		this->serv_data = (data_server) {"", "", "", prt, pass};
   return ;
 }
 
@@ -57,6 +46,10 @@ server::~server( void )
 {
 	std::cout << "Destructor constructor called" << std::endl;
 }
+
+/*###########################################
+#			OVERLOADING						#
+############################################*/
 
 server & server::operator=(const server &tmp)
 {
@@ -76,6 +69,10 @@ std::ostream &operator<<(std::ostream& os, const server &tmp)
 	os << "port           |     " << tmp.get_port() << std::endl;
 	return (os);
 }
+
+/*###########################################
+#			PARSEO							#
+############################################*/
 
 bool	server::is_good_host(std::string host) const
 {
@@ -106,7 +103,7 @@ bool	server::is_good_port(std::string port) const
   port_i = atoi(port.c_str());
   if (port != std::to_string(port_i))
     return(0);
-  if (port_i < 6000 /*|| port_i > 7000*/) // What about 80 and 8080 port????????
+  if (port_i < 6000 || port_i > 7000)
     return (0);
   return (1);
 }
@@ -123,6 +120,16 @@ bool	server::check_data_correct(void) const
 			return (0);
   return (1);
 }
+
+void server::fds_search_data(void) const
+{
+	for (int i = 0;i < N_CLIENTS ; i++)
+		std::cout << "fds[" << i <<"]fd = "<< this->fds[i].fd <<" events = "<< this->fds[i].events << " revents = "<< this->fds[i].revents << std::endl;
+}
+
+/*###########################################
+#			THE REAL DEAL					#
+############################################*/
 
 sock_in	init_socket_struct(std::string port, std::string host)
 {
@@ -168,13 +175,7 @@ int		server::server_listening(void)
 	return 1;
 }
 
-void server::fds_search_data(void) const
-{
-	for (int i = 0;i < N_CLIENTS ; i++)
-		std::cout << "fds[" << i <<"]fd = "<< this->fds[i].fd <<" events = "<< this->fds[i].events << " revents = "<< this->fds[i].revents << std::endl;
-}
-
-int	server::close_fds_client(int i, Data_Running *run)
+int	server::close_fds_client(int i, data_running *run)
 {
 	close(this->fds[i].fd);
 	this->fds[i].fd = -1;
@@ -201,13 +202,13 @@ int server::msg_to_all(int i)
 			continue;
 		if (fds[j].fd == this->listening_socket)
 			break;
-		if (!this->msg.send_message(fds[j].fd, this->msg.get_message().c_str()))
+		if (!this->msg.send_message(fds[j].fd, this->msg.get_message()))
 			return (0);
 	}
 	return (1);
 }
 
-int server::recieve_msg(Data_Running *run, int i)
+int server::recieve_msg(data_running *run, int i)
 {
 	run->close_connection = false;
 
@@ -242,7 +243,7 @@ int server::recieve_msg(Data_Running *run, int i)
 	return (1);
 }
 
-int	server::accept_client(Data_Running *run)
+int	server::accept_client(data_running *run)
 {
 	run->new_sd = accept(this->listening_socket, NULL, NULL);
 	if (run->new_sd < 0)
@@ -271,7 +272,7 @@ int	server::accept_client(Data_Running *run)
 	return (1);
 }
 
-void	server::search_fds(Data_Running *run)
+void	server::search_fds(data_running *run)
 {
 	for (int i = 0; i < run->current_size;i++)
 	{
@@ -310,12 +311,11 @@ void	server::search_fds(Data_Running *run)
 
 int	server::start(void)
 {
-	struct Data_Running *serv_run;
+	data_running *serv_run;
 
 	this->fds[0].fd 	= this->listening_socket;
   	this->fds[0].events = POLLIN;
-	serv_run = (Data_Running *)calloc(sizeof(Data_Running), 1);
-	serv_run->compress_array = false;
+	serv_run = (data_running *)calloc(sizeof(data_running), 1);
 	serv_run->current_size = 0;
 	serv_run->n_active_fds = 1;
 	serv_run->status = true;
@@ -346,27 +346,3 @@ int	server::start(void)
 	delete serv_run;
 	return (0);
 }
-
-// if (compress_array == true)
-// 			{
-// 				compress_array = false;
-// 				for (int x = 0; x < n_active_fds; x++)
-// 				{
-// 					if (fds[x].fd == -1)
-// 					{
-// 					for(int j = x; j < n_active_fds; j++)
-// 					{
-// 						fds[j].fd = fds[j+1].fd;
-// 					}
-// 					x--;
-// 					n_active_fds--;
-// 					}
-// 				}
-// 			}
-
-
-// for (int i = 0; i < n_active_fds; i++)
-// 	{
-// 		if(fds[i].fd >= 0)
-// 		close(fds[i].fd);
-// 	}

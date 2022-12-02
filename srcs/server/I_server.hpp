@@ -1,18 +1,18 @@
-#ifndef ISERVER_HPP
-#define ISERVER_HPP
+#ifndef I_SERVER_HPP
+#define I_SERVER_HPP
 
 #include "../general/general.hpp"
 #include "server.hpp"
 
 class	server;
 
-class	Iserver {
+class	I_server {
 
 	private:
 
 	public:
 
-		virtual 		~Iserver 			(void){};
+		virtual 		~I_server 			(void){};
 		virtual bool	check_data_correct	(void) const = 0;
 		virtual int		server_listening	(void) = 0;
 		virtual int		start				(void) = 0;

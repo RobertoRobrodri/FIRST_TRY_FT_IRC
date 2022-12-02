@@ -13,25 +13,27 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+#include <unistd.h>
+#include <vector>
+#include <sstream>
 
 //Struct para almacenar los datos del servidor
-struct Data_Server {             
+typedef struct data_server {             
 	std::string host;
 	std::string network_pass;
 	std::string network_port;
 	std::string port;
-	std::string password;   
-}; 
+	std::string password;
+} data_server; 
 
 //Struct para almacenar los datos que debe tener el servidor activo
-struct Data_Running {            
+typedef struct data_running {            
 	bool		status;
 	int			current_size;
 	int			poll_result;
 	int			new_sd;
 	bool		close_connection;
-	bool		compress_array;
 	int			n_active_fds;
-}; 
+} data_running; 
 
 #endif

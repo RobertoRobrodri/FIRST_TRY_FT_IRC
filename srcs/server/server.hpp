@@ -2,13 +2,13 @@
 #define SERVER_HPP
 
 #include "../general/general.hpp"
-#include "Iserver.hpp"
+#include "I_server.hpp"
 #include "../client/client.hpp"
 #include "../msg/msg.hpp"
 
 
 
-class	server : public Iserver
+class	server : public I_server
 {
 
 	private:
@@ -17,7 +17,7 @@ class	server : public Iserver
 		client				clients[N_CLIENTS];
 		msg					msg;
 		int					listening_socket;
-		struct Data_Server 	serv_data;
+		data_server 		serv_data;
 
 
 		/*###########################################
@@ -30,11 +30,11 @@ class	server : public Iserver
 		############################################*/
 		bool	is_good_port	(std::string port) const;
 		bool	is_good_host	(std::string host) const;
-		void	search_fds		(Data_Running *run);
-		int		accept_client	(Data_Running *run);
-		int		recieve_msg		(Data_Running *run, int i);
+		void	search_fds		(data_running *run);
+		int		accept_client	(data_running *run);
+		int		recieve_msg		(data_running *run, int i);
 		int		msg_to_all		(int i);
-		int		close_fds_client(int i, Data_Running *run);
+		int		close_fds_client(int i, data_running *run);
 
 		/*###########################################
 		#			DEBUG    	FUNCTIONS			#

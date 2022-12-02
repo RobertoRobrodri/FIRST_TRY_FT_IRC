@@ -2,9 +2,9 @@
 #define MSG_HPP
 
 #include "../general/general.hpp"
-#include "Iprotocols.hpp"
+#include "I_protocols.hpp"
 
-class	msg : public Iprotocols
+class	msg : public I_protocols
 {
 
 	private:
@@ -28,7 +28,7 @@ class	msg : public Iprotocols
 		############################################*/
 		void 	clear_message	(void);
 		int		recv_message	(int fd);
-		int		send_message	(int fd, const char *str);
+		int		send_message	(int fd, std::string str);
 		/*###########################################
 		#	INTERFACE		PROTOCOL	FUNCTIONS	#
 		############################################*/
