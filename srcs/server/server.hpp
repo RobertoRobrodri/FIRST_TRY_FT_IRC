@@ -1,41 +1,15 @@
 #ifndef SERVER_HPP
 #define SERVER_HPP
-#define	sock_in		struct sockaddr_in
-#define	sock_addr	struct sockaddr
 
-#define N_CLIENTS 5+1			//Numero de Clientes (fd) + el fd del host
-#define TIMEOUT_MS 10*1000*60 	//Tiempo de desconexion en caso de no recivir nada
-
+#include "../general/general.hpp"
+#include "Iserver.hpp"
 #include "../client/client.hpp"
 #include "../msg/msg.hpp"
-#include <poll.h>
-#include <string>
-#include <iostream>
-#include <cstring>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <netdb.h>
 
-struct Data_Server {             //Struct para almacenar los datos del servidor
-	std::string host;
-	std::string network_pass;
-	std::string network_port;
-	std::string port;
-	std::string password;   
-}; 
 
-struct Data_Running {             //Struct para almacenar los datos que debe tener el servidor activo
-	bool		status;
-	int			current_size;
-	int			poll_result;
-	int			new_sd;
-	bool		close_connection;
-	bool		compress_array;
-	int			n_active_fds;
-}; 
 
-class	server {
+class	server : public Iserver
+{
 
 	private:
 
@@ -84,7 +58,7 @@ class	server {
 		std::string get_password	(void) const {return(this->serv_data.password);};
 
 		/*###########################################
-		#			PUBLIC	FUNCTIONS				#
+		#			INTERFACE	FUNCTIONS			#
 		############################################*/
 		bool	check_data_correct	(void) const;
 		int		server_listening	(void);
@@ -92,6 +66,7 @@ class	server {
 };
 
 std::ostream &operator<<(std::ostream& os, const server &tmp);
+
 sock_in	init_socket_struct(std::string port, std::string host);
 
 #endif

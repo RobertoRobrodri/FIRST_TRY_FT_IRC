@@ -20,6 +20,9 @@ int ft_len(const char *str)
   return (i);
 }
 
+/*###########################################
+#		CANNONICAL		FUNCTIONS			#
+############################################*/
 msg::msg( void ) : message(""), bytes_recieved (0)
 {
   return ;
@@ -53,6 +56,10 @@ std::ostream &operator<<(std::ostream& os, const msg &tmp)
   os << tmp.get_message();
 	return (os);
 }
+
+/*###########################################
+#		PUBLIC			FUNCTIONS			#
+############################################*/
 
 int msg::recv_message(int fd)
 {
@@ -95,3 +102,12 @@ void msg::clear_message(void)
   return ;
 }
 
+/*###########################################
+#	INTERFACE		PROTOCOL	FUNCTIONS	#
+############################################*/
+
+void msg::welcome_client(int fd)
+{
+  (void)fd;
+  std::cout << "Test " << std::endl;
+}

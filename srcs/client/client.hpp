@@ -1,10 +1,7 @@
 #ifndef CLIENT_HPP
 #define CLIENT_HPP
-#include <string>
-#include <iostream>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <netdb.h>
+
+#include "../general/general.hpp"
 
 class	client {
 
