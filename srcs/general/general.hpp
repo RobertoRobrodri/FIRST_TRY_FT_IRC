@@ -20,8 +20,8 @@
 //Struct para almacenar los datos del servidor
 typedef struct data_server {             
 	std::string host;
-	std::string network_pass;
 	std::string network_port;
+	std::string network_pass;
 	std::string port;
 	std::string password;
 } data_server; 

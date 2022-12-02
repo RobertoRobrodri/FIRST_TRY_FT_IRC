@@ -32,7 +32,7 @@ class	msg : public I_protocols
 		/*###########################################
 		#	INTERFACE		PROTOCOL	FUNCTIONS	#
 		############################################*/
-		void welcome_client	(int fd);
+		client welcome_client	(int fd);
 		/*###########################################
 		#				GETTERS						#
 		############################################*/

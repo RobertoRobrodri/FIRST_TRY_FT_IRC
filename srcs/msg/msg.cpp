@@ -98,8 +98,10 @@ void msg::clear_message(void)
 #	INTERFACE		PROTOCOL	FUNCTIONS	#
 ############################################*/
 
-void msg::welcome_client(int fd)
+client msg::welcome_client(int fd)
 {
+  client  c;
   (void)fd;
   std::cout << "Test " << std::endl;
+  return (c);
 }

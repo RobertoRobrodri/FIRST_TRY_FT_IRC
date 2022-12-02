@@ -28,8 +28,6 @@ class	server : public I_server
 		/*###########################################
 		#			PRIVATE    	FUNCTIONS			#
 		############################################*/
-		bool	is_good_port	(std::string port) const;
-		bool	is_good_host	(std::string host) const;
 		void	search_fds		(data_running *run);
 		int		accept_client	(data_running *run);
 		int		recieve_msg		(data_running *run, int i);
@@ -68,5 +66,7 @@ class	server : public I_server
 std::ostream &operator<<(std::ostream& os, const server &tmp);
 
 sock_in	init_socket_struct(std::string port, std::string host);
+bool	is_good_host(std::string host);
+bool	is_good_port(std::string port);
 
 #endif
