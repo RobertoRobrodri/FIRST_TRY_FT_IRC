@@ -36,4 +36,7 @@ typedef struct data_running {
 	int			n_active_fds;
 } data_running; 
 
+//Funciones que cualquiera puede usar
+std::vector<std::string> split_in_vector(std::string str, char c);
+
 #endif

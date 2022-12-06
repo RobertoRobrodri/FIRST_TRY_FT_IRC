@@ -6,7 +6,7 @@
 /*   By: mortiz-d <mortiz-d@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/02 18:59:58 by mortiz-d          #+#    #+#             */
-/*   Updated: 2022/12/02 19:00:41 by mortiz-d         ###   ########.fr       */
+/*   Updated: 2022/12/06 18:36:10 by mortiz-d         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,19 +14,26 @@
 
 int	server::close_fds_client(int i, data_running *run)
 {
+	client c;
+	
 	close(this->fds[i].fd);
 	this->fds[i].fd = -1;
+	c = this->clients[i];
+	std::cout << this->clients[i].getnick() << " se ha desconnectado" << std::endl;
 	for (int x = 0; x < run->n_active_fds; x++)
 	{
 		if (fds[x].fd == -1)
 		{
 			for(int j = x; j < run->n_active_fds; j++)
+			{
 				fds[j].fd = fds[j+1].fd;
+				this->clients[j] = this->clients[j+1];
+			}
 			x--;
 			run->n_active_fds--;
 		}
 	}
-	std::cout << "CLIENT["<< i <<"] left the server..." << std::endl;
+	// std::cout << c.getnick() << " se ha desconnectado" << std::endl;
 	return (1);
 }
 
@@ -56,9 +63,9 @@ int server::recieve_msg(data_running *run, int i)
 		return (0);
 	}
 	//Procesamos el mensaje
-	this->msg.set_message("CLIENT["+std::to_string(i)+"] :"+this->msg.get_message());
+	this->msg.set_message(this->clients[i].getnick()+":"+this->msg.get_message());
 	//Mostramos el mensaje en el servidor
-	std::cout << msg;
+	std::cout << "e " <<  msg;
 	//Mandamos el mensaje a los demas clientes
 	if (!this->msg_to_all(i))
 	{
@@ -101,7 +108,8 @@ int	server::accept_client(data_running *run)
 		fds[run->n_active_fds].events = POLL_IN;
 		fds[run->n_active_fds - 1].fd = run->new_sd;
 		fds[run->n_active_fds - 1].events = POLLIN;
-		std::cout << "Tenemos un nuevo cliente connectado ... hay un total de -> "<< run->n_active_fds << std::endl;
+		this->clients[run->n_active_fds - 1] = msg.welcome_client(run->new_sd);
+		std::cout << "Tenemos un nuevo cliente connectado ... saludar a "<< this->clients[run->n_active_fds - 1].getnick() << std::endl;
 		run->n_active_fds++;
 		// fds_search_data();
 	}

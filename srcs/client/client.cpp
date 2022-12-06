@@ -46,9 +46,9 @@ std::ostream &operator<<(std::ostream& os, const client &tmp)
 {
 	std::cout << "Operator output called" << std::endl;
 	os << "Client output" << std::endl;
-	os << "realname_host	|     " << tmp.getnick() << std::endl;
-	os << "username_host	|     " << tmp.getrealname_host() << std::endl;
-	os << "nickname			|     " << tmp.getusername_host() << std::endl;
+	os << "realname_host	|     " << tmp.getrealname_host() << std::endl;
+	os << "username_host	|     " << tmp.getusername_host() << std::endl;
+	os << "nickname	|     " << tmp.getnick() << std::endl;
 	return (os);
 }
 

@@ -23,12 +23,9 @@ server::server( void )
 
 server::server( std::string network , std::string prt , std::string pass )
 {
-    std::stringstream 			test(network);
-    std::string 				segment;
-    std::vector <std::string>	seglist;
-
-    while (std::getline(test,segment,':'))
-    	seglist.push_back(segment);
+	std::vector <std::string>	seglist;
+	
+	seglist = split_in_vector(network,':');
     if (seglist.size() == 3)
 		this->serv_data = (data_server) {seglist[0], seglist[1], seglist[2], prt, pass};
 	else

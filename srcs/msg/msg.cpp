@@ -59,8 +59,7 @@ int msg::recv_message(int fd)
 
   this->clear_message();
   this->set_bytes_recieved(recv(fd, buff, sizeof(buff), 0));
-	this->set_message(std::string(buff,this->get_bytes_recieved()));
-	
+  std::cout << "Bytes recieved -> " << this->get_bytes_recieved() << std::endl;
 	if (this->get_bytes_recieved() < 0)
 	{
 		std::cout << "Error recv() failed " << std::endl;
@@ -71,6 +70,7 @@ int msg::recv_message(int fd)
 		std::cout << "Connection closed "<< std::endl;
 		return (0);;
 	}
+  this->set_message(std::string(buff,this->get_bytes_recieved()));
   return (1);
 }
 
@@ -94,14 +94,4 @@ void msg::clear_message(void)
   return ;
 }
 
-/*###########################################
-#	INTERFACE		PROTOCOL	FUNCTIONS	#
-############################################*/
 
-client msg::welcome_client(int fd)
-{
-  client  c;
-  (void)fd;
-  std::cout << "Test " << std::endl;
-  return (c);
-}
