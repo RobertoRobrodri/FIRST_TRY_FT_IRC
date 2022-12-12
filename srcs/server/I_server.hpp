@@ -16,7 +16,7 @@ class	I_server {
 		virtual bool	check_data_correct	(void) const = 0;
 		virtual int		server_listening	(void) = 0;
 		virtual int		start				(void) = 0;
-		
+		virtual void	analize_msg			(int i) = 0;
 };
 
 

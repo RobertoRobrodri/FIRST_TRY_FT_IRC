@@ -14,7 +14,7 @@ class	I_protocols {
 	public:
 
 		virtual ~I_protocols (void){};
-		virtual client welcome_client	(int fd) = 0;
+		virtual void welcome_client	(int fd) = 0;
 		
 };
 

@@ -10,6 +10,7 @@ class	msg : public I_protocols
 	private:
 		std::string message;
 		int			bytes_recieved;
+		std::string cmd[2];
 
 		/*###########################################
 		#			CLOSED    	FUNCTIONS			#
@@ -26,13 +27,14 @@ class	msg : public I_protocols
 		/*###########################################
 		#			PUBLIC	FUNCTIONS				#
 		############################################*/
+		
 		void 	clear_message	(void);
 		int		recv_message	(int fd);
 		int		send_message	(int fd, std::string str);
 		/*###########################################
 		#	INTERFACE		PROTOCOL	FUNCTIONS	#
 		############################################*/
-		client welcome_client	(int fd);
+		void welcome_client	(int fd);
 		/*###########################################
 		#				GETTERS						#
 		############################################*/

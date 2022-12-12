@@ -12,6 +12,46 @@
 
 #include "server.hpp"
 
+void server::analize_msg (int i)
+{
+  	std::vector <std::string>	line;
+  	std::string str;
+	std::string str_aux;
+  	int aux;
+
+  	aux = find_single_word_on_str(this->msg.get_message() , NICKNAME);
+  	str = this->msg.get_message();
+  	// str = find_single_word_on_str(this->get_message() , NICKNAME);
+  	if (aux != -1)
+	{
+		line = split_in_vector(&str[aux],' ');
+		if ( line.size() >= 2)
+		{
+		// str_from_start_to_end(str,line[1])
+		//" next pos -> " << aux + str_end_word_position(&str[aux] , line[1]) 
+		this->msg.set_message(this->msg.get_message().erase(aux , aux + str_end_word_position(&str[aux] , line[1])));
+		line[1].erase(line[1].find_last_not_of(" \n\r\t")+1);
+		this->clients[i].setnick(line[1]);
+		}
+		else
+		std::cout << "No hay suficientes palabras en Nick para asignar un nickname :( " << std::endl;
+	}
+
+	aux = find_single_word_on_str(this->msg.get_message() , MESSAGE);
+  	str = this->msg.get_message();
+	if (aux != -1)
+	{
+		str_aux = this->msg.get_message();
+		this->msg.set_message(clients[i].getnick() + ":" + &str[aux + 4]);
+		this->msg_to_all(i);
+		std::cout << "crash 1" << std::endl;
+		// str_from_start_to_end(str,line[1])
+		//" next pos -> " << aux + str_end_word_position(&str[aux] , line[1]) 
+		this->msg.set_message(str_aux.erase(aux , str_aux.length()));
+		std::cout << "No hay suficientes palabras en Nick para asignar un mensaje" << std::endl;
+	}
+}
+
 int	server::close_fds_client(int i, data_running *run)
 {
 	client c;
@@ -63,16 +103,14 @@ int server::recieve_msg(data_running *run, int i)
 		return (0);
 	}
 	//Procesamos el mensaje
-	this->msg.set_message(this->clients[i].getnick()+":"+this->msg.get_message());
-	//Mostramos el mensaje en el servidor
-	std::cout << "e " <<  msg;
+	this->analize_msg(i);
 	//Mandamos el mensaje a los demas clientes
-	if (!this->msg_to_all(i))
-	{
-		run->close_connection = true;
-		return (0);
-	}
-	//Mandamos una confirmaion al cliente de vuelta
+	// if (!this->msg_to_all(i))
+	// {
+	// 	run->close_connection = true;
+	// 	return (0);
+	// }
+	// Mandamos una confirmacion al cliente de vuelta
 	// if (!this->msg.send_message(fds[i].fd,"mensaje recibido\n"))
 	// {
 	// 	run->close_connection = true;
@@ -108,7 +146,8 @@ int	server::accept_client(data_running *run)
 		fds[run->n_active_fds].events = POLL_IN;
 		fds[run->n_active_fds - 1].fd = run->new_sd;
 		fds[run->n_active_fds - 1].events = POLLIN;
-		this->clients[run->n_active_fds - 1] = msg.welcome_client(run->new_sd);
+		this->clients[run->n_active_fds - 1].clear_Client();
+		msg.welcome_client(run->new_sd);
 		std::cout << "Tenemos un nuevo cliente connectado ... saludar a "<< this->clients[run->n_active_fds - 1].getnick() << std::endl;
 		run->n_active_fds++;
 		// fds_search_data();

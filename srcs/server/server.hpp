@@ -33,7 +33,7 @@ class	server : public I_server
 		int		recieve_msg		(data_running *run, int i);
 		int		msg_to_all		(int i);
 		int		close_fds_client(int i, data_running *run);
-
+		void	analize_msg		(int i);
 		/*###########################################
 		#			DEBUG    	FUNCTIONS			#
 		############################################*/

@@ -6,6 +6,11 @@
 #define N_CLIENTS 5+1			//Numero de Clientes (fd) + el fd del host
 #define TIMEOUT_MS 10*1000*60 	//Tiempo de desconexion en caso de no recivir nada
 
+#define NICKNAME "NICK"
+#define MESSAGE "MSG"
+#define USERNAME "USER"
+
+
 #include <poll.h>
 #include <string>
 #include <iostream>
@@ -38,5 +43,6 @@ typedef struct data_running {
 
 //Funciones que cualquiera puede usar
 std::vector<std::string> split_in_vector(std::string str, char c);
-
+int find_single_word_on_str (std::string str , std::string word);
+int str_end_word_position (std::string str , std::string end);
 #endif

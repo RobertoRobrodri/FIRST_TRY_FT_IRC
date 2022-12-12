@@ -17,11 +17,16 @@
 ############################################*/
 msg::msg( void ) : message(""), bytes_recieved (0)
 {
+  //{NICKNAME,USERNAME}
+  cmd[0] = NICKNAME;
+  cmd[1] = USERNAME;
   return ;
 }
 
 msg::msg( std::string str ) : message(str), bytes_recieved (0)
 {
+  cmd[0] = NICKNAME;
+  cmd[1] = USERNAME;
   return ;
 }
 
@@ -93,5 +98,3 @@ void msg::clear_message(void)
   this->bytes_recieved = 0;
   return ;
 }
-
-

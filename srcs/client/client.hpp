@@ -20,12 +20,23 @@ class	client {
 		client &operator=(const client &tmp);
 
 		/*###########################################
+		#				FUNCTIONS					#
+		############################################*/
+		void clear_Client(void);
+		
+		/*###########################################
 		#				GETTERS						#
 		############################################*/
 		std::string getnick(void)			const	{return(this->nick);};
 		std::string getrealname_host(void)	const 	{return(this->realname_host);};
 		std::string getusername_host(void)	const 	{return(this->username_host);};
 
+		/*###########################################
+		#				SETTERS						#
+		############################################*/
+		void setnick(std::string s)				{this->nick = s;};
+		void setrealname_host(std::string s)	 	{this->realname_host = s;};
+		void setusername_host(std::string s)	 	{this->username_host = s;};
 };
 
 std::ostream &operator<<(std::ostream& os, const client &tmp);

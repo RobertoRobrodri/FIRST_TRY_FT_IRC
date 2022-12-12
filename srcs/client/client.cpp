@@ -52,3 +52,10 @@ std::ostream &operator<<(std::ostream& os, const client &tmp)
 	return (os);
 }
 
+void client::clear_Client(void)
+{
+  this->nick = "";
+  this->realname_host = "";
+  this->username_host = "";
+  return ;
+}
