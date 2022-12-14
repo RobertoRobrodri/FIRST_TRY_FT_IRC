@@ -71,7 +71,6 @@ int server::recieve_msg(data_running *run, int i)
 	if (!this->msg.recv_message(fds[i].fd))
 	{
 		run->close_connection = true;
-		return (0);
 	}
 	
 	//Si paso algo raro cerramos el cliente // procesamos el mensaje
@@ -79,6 +78,7 @@ int server::recieve_msg(data_running *run, int i)
 	{
 		std::cout << "Un error inesperado cerro la conexion del cliente... "<< i << std::endl;
 		this->close_fds_client(i, run);
+		return (0);
 	}
 	else
 	{
