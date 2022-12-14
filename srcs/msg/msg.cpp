@@ -17,16 +17,11 @@
 ############################################*/
 msg::msg( void ) : message(""), bytes_recieved (0)
 {
-  //{NICKNAME,USERNAME}
-  cmd[0] = NICKNAME;
-  cmd[1] = USERNAME;
   return ;
 }
 
 msg::msg( std::string str ) : message(str), bytes_recieved (0)
 {
-  cmd[0] = NICKNAME;
-  cmd[1] = USERNAME;
   return ;
 }
 
@@ -64,7 +59,7 @@ int msg::recv_message(int fd)
 
   this->clear_message();
   this->set_bytes_recieved(recv(fd, buff, sizeof(buff), 0));
-  std::cout << "Bytes recieved -> " << this->get_bytes_recieved() << std::endl;
+  // std::cout << "Bytes recieved -> " << this->get_bytes_recieved() << std::endl;
 	if (this->get_bytes_recieved() < 0)
 	{
 		std::cout << "Error recv() failed " << std::endl;

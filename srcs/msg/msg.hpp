@@ -2,15 +2,13 @@
 #define MSG_HPP
 
 #include "../general/general.hpp"
-#include "I_protocols.hpp"
 
-class	msg : public I_protocols
+class	msg
 {
 
 	private:
 		std::string message;
 		int			bytes_recieved;
-		std::string cmd[2];
 
 		/*###########################################
 		#			CLOSED    	FUNCTIONS			#
@@ -34,7 +32,6 @@ class	msg : public I_protocols
 		/*###########################################
 		#	INTERFACE		PROTOCOL	FUNCTIONS	#
 		############################################*/
-		void welcome_client	(int fd);
 		/*###########################################
 		#				GETTERS						#
 		############################################*/

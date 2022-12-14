@@ -25,11 +25,11 @@ TEST_PATH		= test
 
 # SOURCES #
 
-SUBFILE1_SRC = server.cpp check_server.cpp server_comm.cpp server_set_up.cpp
+SUBFILE1_SRC = server.cpp check_server.cpp server_comm.cpp server_set_up.cpp commands.cpp
 
 SUBFILE2_SRC = client.cpp
 
-SUBFILE3_SRC = msg.cpp protocols.cpp
+SUBFILE3_SRC = msg.cpp 
 
 SUBFILE4_SRC = aux_functions.cpp
 

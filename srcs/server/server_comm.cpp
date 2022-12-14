@@ -6,7 +6,7 @@
 /*   By: mortiz-d <mortiz-d@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/02 18:59:58 by mortiz-d          #+#    #+#             */
-/*   Updated: 2022/12/06 18:36:10 by mortiz-d         ###   ########.fr       */
+/*   Updated: 2022/12/14 17:10:33 by mortiz-d         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,41 +14,13 @@
 
 void server::analize_msg (int i)
 {
-  	std::vector <std::string>	line;
-  	std::string str;
-	std::string str_aux;
-  	int aux;
-
-  	aux = find_single_word_on_str(this->msg.get_message() , NICKNAME);
-  	str = this->msg.get_message();
-  	// str = find_single_word_on_str(this->get_message() , NICKNAME);
-  	if (aux != -1)
+	std::string cmd[3] = {NICKNAME,USERNAME,MESSAGE};
+	server::funptr function[3] = {&server::extract_NICK , &server::extract_USERNAME ,&server::extract_MSG};
+  	
+	for (int x = 0; x < 3; x++)
 	{
-		line = split_in_vector(&str[aux],' ');
-		if ( line.size() >= 2)
-		{
-		// str_from_start_to_end(str,line[1])
-		//" next pos -> " << aux + str_end_word_position(&str[aux] , line[1]) 
-		this->msg.set_message(this->msg.get_message().erase(aux , aux + str_end_word_position(&str[aux] , line[1])));
-		line[1].erase(line[1].find_last_not_of(" \n\r\t")+1);
-		this->clients[i].setnick(line[1]);
-		}
-		else
-		std::cout << "No hay suficientes palabras en Nick para asignar un nickname :( " << std::endl;
-	}
-
-	aux = find_single_word_on_str(this->msg.get_message() , MESSAGE);
-  	str = this->msg.get_message();
-	if (aux != -1)
-	{
-		str_aux = this->msg.get_message();
-		this->msg.set_message(clients[i].getnick() + ":" + &str[aux + 4]);
-		this->msg_to_all(i);
-		std::cout << "crash 1" << std::endl;
-		// str_from_start_to_end(str,line[1])
-		//" next pos -> " << aux + str_end_word_position(&str[aux] , line[1]) 
-		this->msg.set_message(str_aux.erase(aux , str_aux.length()));
-		std::cout << "No hay suficientes palabras en Nick para asignar un mensaje" << std::endl;
+		if (find_single_word_on_str(this->msg.get_message() , cmd[x]) != -1)
+			(this->*(function[x]))(i);
 	}
 }
 
@@ -73,7 +45,6 @@ int	server::close_fds_client(int i, data_running *run)
 			run->n_active_fds--;
 		}
 	}
-	// std::cout << c.getnick() << " se ha desconnectado" << std::endl;
 	return (1);
 }
 
@@ -102,25 +73,25 @@ int server::recieve_msg(data_running *run, int i)
 		run->close_connection = true;
 		return (0);
 	}
-	//Procesamos el mensaje
-	this->analize_msg(i);
-	//Mandamos el mensaje a los demas clientes
-	// if (!this->msg_to_all(i))
-	// {
-	// 	run->close_connection = true;
-	// 	return (0);
-	// }
-	// Mandamos una confirmacion al cliente de vuelta
-	// if (!this->msg.send_message(fds[i].fd,"mensaje recibido\n"))
-	// {
-	// 	run->close_connection = true;
-	// 	return (0);
-	// }
-
+	
+	//Si paso algo raro cerramos el cliente // procesamos el mensaje
 	if (run->close_connection == true)
 	{
 		std::cout << "Un error inesperado cerro la conexion del cliente... "<< i << std::endl;
 		this->close_fds_client(i, run);
+	}
+	else
+	{
+		//Analizamos el mensaje y mostramos en el terminal los datos no procesados
+		std::cout << this->clients[i].getnick() << " <data before analisis>:" << std::endl << this->msg.get_message() << std::endl;
+		this->analize_msg(i);
+		if (this->msg.get_message() != "")
+		{
+			if (clients[i].getnick() != "")
+				std::cout << this->clients[i].getnick() << " <data useless>:" << std::endl << this->msg.get_message() << std::endl;
+			else
+				std::cout <<"CLIENT["<<i<<"] <data useless>:" << this->msg.get_message() << std::endl;
+		}
 	}
 	return (1);
 }
@@ -147,8 +118,8 @@ int	server::accept_client(data_running *run)
 		fds[run->n_active_fds - 1].fd = run->new_sd;
 		fds[run->n_active_fds - 1].events = POLLIN;
 		this->clients[run->n_active_fds - 1].clear_Client();
-		msg.welcome_client(run->new_sd);
-		std::cout << "Tenemos un nuevo cliente connectado ... saludar a "<< this->clients[run->n_active_fds - 1].getnick() << std::endl;
+		this->welcome_client(run->new_sd);
+		std::cout << "New client added to the network ..." << std::endl;
 		run->n_active_fds++;
 		// fds_search_data();
 	}

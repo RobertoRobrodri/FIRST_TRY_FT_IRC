@@ -3,12 +3,13 @@
 
 #include "../general/general.hpp"
 #include "I_server.hpp"
+#include "I_commands.hpp"
 #include "../client/client.hpp"
 #include "../msg/msg.hpp"
 
 
 
-class	server : public I_server
+class	server : public I_server , public I_commands
 {
 
 	private:
@@ -38,6 +39,15 @@ class	server : public I_server
 		#			DEBUG    	FUNCTIONS			#
 		############################################*/
 		void fds_search_data(void) const;
+
+		/*###########################################
+		#			COMMANDS    FUNCTIONS			#
+		############################################*/
+		typedef void (server::*funptr) (int i);
+		void 	welcome_client	(int fd);
+		void	extract_MSG		(int i);
+		void	extract_USERNAME(int i);
+		void	extract_NICK	(int i);
 
 	public:
 
