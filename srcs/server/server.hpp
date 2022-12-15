@@ -31,7 +31,7 @@ class	server : public I_server , public I_commands
 		############################################*/
 		void	search_fds		(data_running *run);
 		int		accept_client	(data_running *run);
-		int		recieve_msg		(data_running *run, int i);
+		int		recieve_data	(data_running *run, int i);
 		int		msg_to_all		(int i);
 		int		close_fds_client(int i, data_running *run);
 		void	analize_msg		(int i);
@@ -43,11 +43,11 @@ class	server : public I_server , public I_commands
 		/*###########################################
 		#			COMMANDS    FUNCTIONS			#
 		############################################*/
-		typedef void (server::*funptr) (int i);
+		typedef void (server::*funptr) (int i , std::string st);
 		void 	welcome_client	(int fd);
-		void	extract_MSG		(int i);
-		void	extract_USERNAME(int i);
-		void	extract_NICK	(int i);
+		void	extract_MSG		(int i , std::string str);
+		void	extract_USERNAME(int i , std::string st);
+		void	extract_NICK	(int i , std::string st);
 
 	public:
 

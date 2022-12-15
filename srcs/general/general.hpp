@@ -37,7 +37,6 @@ typedef struct data_running {
 	int			current_size;
 	int			poll_result;
 	int			new_sd;
-	bool		close_connection;
 	int			n_active_fds;
 } data_running; 
 

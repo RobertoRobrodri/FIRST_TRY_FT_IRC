@@ -23,20 +23,17 @@ void server::welcome_client(int fd)
 	return;
 }
 
-void server::extract_NICK	(int i)
+void server::extract_NICK	(int i , std::string str)
 {
 	std::vector <std::string>	line;
-	std::string str;
 	int aux;
 
-	str = this->msg.get_message();
 	aux = find_single_word_on_str(str , NICKNAME);
 	if (aux != -1)
 	{
 		line = split_in_vector(&str[aux],' ');
 		if ( line.size() >= 2)
 		{
-			this->msg.set_message(this->msg.get_message().erase(aux , aux + str_end_word_position(&str[aux] , line[1])));
 			line[1].erase(line[1].find_last_not_of(" \n\r\t")+1);
 			this->clients[i].setnick(line[1]);
 			this->msg.send_message(this->fds[i].fd,"Server : NICK successfully established\n");
@@ -52,30 +49,29 @@ void server::extract_NICK	(int i)
 }
 
 //BASED ON  -> USER <username> <hostname> <servername> <realname> (RFC 1459)
-void server::extract_USERNAME	(int i)
+void server::extract_USERNAME	(int i , std::string str)
 {
 	std::vector <std::string>	line;
-	std::string str;
+	std::vector <std::string>	line2;
 	int aux;
 
-	str = this->msg.get_message();
 	aux = find_single_word_on_str(str , USERNAME);
 	if (aux != -1)
 	{
 		line = split_in_vector(&str[aux],' ');
-		if ( line.size() >= 5)
+		line2 = split_in_vector(&str[aux],':');
+		if ( line.size() >= 5 && line2.size() == 2)
 		{
-			this->msg.set_message(this->msg.get_message().erase(aux , aux + str_end_word_position(&str[aux] , line[4])));
 			line[1].erase(line[1].find_last_not_of(" \n\r\t")+1);
-			line[4].erase(line[4].find_last_not_of(" \n\r\t")+1);
 			this->clients[i].setusername_host(line[1]);
-			this->clients[i].setrealname_host(line[4]);
-			this->msg.send_message(this->fds[i].fd,"Server : USER set up\n");
+			line2[1].erase(line2[1].find_last_not_of("\n\r\t")+1);
+			this->clients[i].setrealname_host(line2[1]);
+			this->msg.send_message(this->fds[i].fd,"Server : USER set up " + this->clients[i].getusername_host() + " - " + this->clients[i].getrealname_host() + "\n" );
 		}
 		else
 		{
-			this->msg.send_message(this->fds[i].fd,"Server : Not enough args to set up USER\n");
-			std::cout << "Server : Not enough args to set up USER for client["<<i<<"]" << std::endl;
+			this->msg.send_message(this->fds[i].fd,"Server : Can not set up USER\n");
+			std::cout << "Server : Could not to set up USER for client["<<i<<"]" << std::endl;
 		}
 			
 	}
@@ -83,14 +79,13 @@ void server::extract_USERNAME	(int i)
   	return;
 }
 
-void server::extract_MSG	(int i)
+void server::extract_MSG	(int i , std::string str)
 {
-  std::string str;
 	std::string str_aux;
-  int aux;
-  
-  aux = find_single_word_on_str(this->msg.get_message() , MESSAGE);
-  str = this->msg.get_message();
+	int aux;
+	
+	aux = find_single_word_on_str(this->msg.get_message() , MESSAGE);
+	str = this->msg.get_message();
 	if (aux != -1)
 	{
 		

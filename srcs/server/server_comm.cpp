@@ -14,13 +14,20 @@
 
 void server::analize_msg (int i)
 {
+	std::vector <std::string>line = split_in_vector(this->msg.get_message(),'\n');
 	std::string cmd[3] = {NICKNAME,USERNAME,MESSAGE};
 	server::funptr function[3] = {&server::extract_NICK , &server::extract_USERNAME ,&server::extract_MSG};
-  	
-	for (int x = 0; x < 3; x++)
+  	if (line.size() >= 1)
 	{
-		if (find_single_word_on_str(this->msg.get_message() , cmd[x]) != -1)
-			(this->*(function[x]))(i);
+		for (int y = 0; y < (int)line.size(); y++)
+		{
+			for (int x = 0; x < 3; x++)
+			{
+				if (find_single_word_on_str(this->msg.get_message() , cmd[x]) != -1)
+					(this->*(function[x]))(i,line[y]);
+			}
+		}
+
 	}
 }
 
@@ -63,20 +70,21 @@ int server::msg_to_all(int i)
 	return (1);
 }
 
-int server::recieve_msg(data_running *run, int i)
+int server::recieve_data(data_running *run, int i)
 {
-	run->close_connection = false;
-
+	bool close_connection;
+	
+	close_connection = false;
 	//Recibimos el mensaje
 	if (!this->msg.recv_message(fds[i].fd))
 	{
-		run->close_connection = true;
+		close_connection = true;
 	}
 	
 	//Si paso algo raro cerramos el cliente // procesamos el mensaje
-	if (run->close_connection == true)
+	if (close_connection == true)
 	{
-		std::cout << "Un error inesperado cerro la conexion del cliente... "<< i << std::endl;
+		std::cout << "Un error inesperado cerro la conexion del cliente... " << std::endl;
 		this->close_fds_client(i, run);
 		return (0);
 	}
@@ -85,13 +93,6 @@ int server::recieve_msg(data_running *run, int i)
 		//Analizamos el mensaje y mostramos en el terminal los datos no procesados
 		std::cout << this->clients[i].getnick() << " <data before analisis>:" << std::endl << this->msg.get_message() << std::endl;
 		this->analize_msg(i);
-		if (this->msg.get_message() != "")
-		{
-			if (clients[i].getnick() != "")
-				std::cout << this->clients[i].getnick() << " <data useless>:" << std::endl << this->msg.get_message() << std::endl;
-			else
-				std::cout <<"CLIENT["<<i<<"] <data useless>:" << this->msg.get_message() << std::endl;
-		}
 	}
 	return (1);
 }

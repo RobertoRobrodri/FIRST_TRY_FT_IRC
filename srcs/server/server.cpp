@@ -102,9 +102,8 @@ void	server::search_fds(data_running *run)
 		else if(fds[i].revents != 17)
 		{
 			//Recibimos el mensaje
-			if(!recieve_msg(run,i))
+			if(!recieve_data(run,i))
 			{
-				msg.clear_message();
 				break;
 			}
 		}
