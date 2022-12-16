@@ -28,7 +28,14 @@ class	I_server {
 		virtual bool	check_data_correct	(void) const = 0;
 		virtual int		server_listening	(void) = 0;
 		virtual int		start				(void) = 0;
-		virtual void	analize_msg			(int i) = 0;
+		virtual void	analize_msg			(int i, data_running *run) = 0;
+
+		//Utilities for the server
+		virtual int		find_client_nick	(std::string str, data_running *run) = 0;
+		virtual int 	find_client_username(std::string str, data_running *run) = 0;
+		virtual int		find_client_realname(std::string str, data_running *run) = 0;
+		virtual int		check_client_NICK_USER(int i) = 0;
+
 };
 
 

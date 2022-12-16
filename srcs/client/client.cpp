@@ -12,12 +12,12 @@
 
 #include "client.hpp"
 
-client::client( void ) : realname_host(""), username_host(""), nick("")
+client::client( void ) : realname_host(""), username_host(""), nick(""), op(false)
 {
   return ;
 }
 
-client::client( std::string rh, std::string uh, std::string ni) : realname_host(rh), username_host(uh), nick(ni)
+client::client( std::string rh, std::string uh, std::string ni) : realname_host(rh), username_host(uh), nick(ni), op(false)
 {
   return ;
 }
@@ -38,6 +38,7 @@ client &client::operator=(const client &tmp)
   this->nick = tmp.nick;
   this->realname_host = tmp.realname_host;
   this->username_host = tmp.username_host;
+  this->op = tmp.op;
   // std::cout << "Operator Client equalizer called" << std::endl;
   return (*this);
 }
@@ -57,5 +58,6 @@ void client::clear_Client(void)
   this->nick = "";
   this->realname_host = "";
   this->username_host = "";
+  this->op = false;
   return ;
 }

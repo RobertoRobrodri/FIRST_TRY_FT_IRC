@@ -26,9 +26,9 @@ class	I_commands {
 
 		virtual ~I_commands (void){};
 		virtual void welcome_client		(int fd) = 0;
-		virtual void extract_NICK		(int i , std::string str) = 0;
-		virtual void extract_USERNAME	(int i , std::string str) = 0;
-		virtual void extract_MSG		(int i , std::string str) = 0;
+		virtual void extract_NICK		(int i , std::string str , data_running *run) = 0;
+		virtual void extract_USERNAME	(int i , std::string str , data_running *run) = 0;
+		virtual void extract_MSG		(int i , std::string str , data_running *run) = 0;
 		
 };
 

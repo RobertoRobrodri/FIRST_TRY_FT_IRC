@@ -12,7 +12,7 @@
 
 #include "server.hpp"
 
-void server::analize_msg (int i)
+void server::analize_msg (int i, data_running *run)
 {
 	std::vector <std::string>line = split_in_vector(this->msg.get_message(),'\n');
 	std::string cmd[3] = {NICKNAME,USERNAME,MESSAGE};
@@ -24,7 +24,7 @@ void server::analize_msg (int i)
 			for (int x = 0; x < 3; x++)
 			{
 				if (find_single_word_on_str(this->msg.get_message() , cmd[x]) != -1)
-					(this->*(function[x]))(i,line[y]);
+					(this->*(function[x]))(i , line[y] , run);
 			}
 		}
 
@@ -82,7 +82,7 @@ int server::recieve_data(data_running *run, int i)
 	}
 	
 	//Si paso algo raro cerramos el cliente // procesamos el mensaje
-	if (close_connection == true)
+	if (close_connection)
 	{
 		std::cout << "Un error inesperado cerro la conexion del cliente... " << std::endl;
 		this->close_fds_client(i, run);
@@ -92,7 +92,7 @@ int server::recieve_data(data_running *run, int i)
 	{
 		//Analizamos el mensaje y mostramos en el terminal los datos no procesados
 		std::cout << this->clients[i].getnick() << " <data before analisis>:" << std::endl << this->msg.get_message() << std::endl;
-		this->analize_msg(i);
+		this->analize_msg(i, run);
 	}
 	return (1);
 }

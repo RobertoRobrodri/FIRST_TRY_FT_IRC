@@ -25,7 +25,7 @@ TEST_PATH		= test
 
 # SOURCES #
 
-SUBFILE1_SRC = server.cpp check_server.cpp server_comm.cpp server_set_up.cpp commands.cpp
+SUBFILE1_SRC = server.cpp check_server.cpp server_comm.cpp server_set_up.cpp commands.cpp server_utilities.cpp
 
 SUBFILE2_SRC = client.cpp
 

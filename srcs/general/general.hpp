@@ -4,7 +4,7 @@
 #define	sock_in		struct sockaddr_in
 #define	sock_addr	struct sockaddr
 #define N_CLIENTS 5+1			//Numero de Clientes (fd) + el fd del host
-#define TIMEOUT_MS 10*1000*60 	//Tiempo de desconexion en caso de no recivir nada
+#define TIMEOUT_MS 3*1000*60 	//Tiempo de desconexion en caso de no recivir nada
 
 #define NICKNAME "NICK"
 #define MESSAGE "MSG"
