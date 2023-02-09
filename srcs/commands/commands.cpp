@@ -6,11 +6,11 @@
 /*   By: mortiz-d <mortiz-d@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/06 13:06:53 by mortiz-d          #+#    #+#             */
-/*   Updated: 2022/12/14 16:45:23 by mortiz-d         ###   ########.fr       */
+/*   Updated: 2023/02/09 21:22:21 by mortiz-d         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "server.hpp"
+#include "../server/server.hpp"
 
 /*###########################################
 #	INTERFACE		PROTOCOL	FUNCTIONS	#
@@ -18,8 +18,8 @@
 
 void server::welcome_client(int fd)
 {
-	std::string rp1 = "Welcome to the Network, please set up ur NICK and USER first\n";
-	this->msg.send_message(fd,rp1);
+	std::string rp1 = "Server : Welcome to the Network, please set up ur NICK and USER first\n";
+	this->send_message(fd,rp1);
 	return;
 }
 
@@ -36,23 +36,17 @@ void server::extract_NICK	(int i , std::string str , data_running *run)
 	{
 		line[1].erase(line[1].find_last_not_of(" \n\r\t")+1);
 		if (this->find_client_nick(line[1],run))
-			this->msg.send_message(this->fds[i].fd,"Server : NICK is already taken\n");
+			this->send_message(this->fds[i].fd,"Server : NICK is already taken\n");
 		else			
-		{
-			this->clients[i].setnick(line[1]);
-			this->msg.send_message(this->fds[i].fd,"Server : NICK successfully established\n");
-		}			
+			this->clients[i].setnick(line[1]);	
 	}
 	else
-	{
-		// ERR_NONICKNAMEGIVEN
-		this->msg.send_message(this->fds[i].fd,"Server : Not enought args to set up NICK\n");
-		std::cout << "Server : Not enough args to set up NICK for client["<<i<<"]" << std::endl;
-	}
+		this->send_message(this->fds[i].fd,"Server : Not enought args to set up NICK\n"); // ERR_NONICKNAMEGIVEN
+
 	return;
 }
 
-//BASED ON  -> USER <username> <hostname> <servername> <realname> (RFC 1459)
+//BASED ON  -> USER <username> <hostname> <servername> :<realname> (RFC 1459)
 void server::extract_USERNAME	(int i , std::string str , data_running *run)
 {
 	(void)run;
@@ -67,26 +61,20 @@ void server::extract_USERNAME	(int i , std::string str , data_running *run)
 	{
 		line[1].erase(line[1].find_last_not_of(" \n\r\t")+1);
 		line2[1].erase(line2[1].find_last_not_of("\n\r\t")+1);
-		if (this->find_client_realname(line2[1],run) || this->find_client_username(line[1],run))
-		{
-			if (this->find_client_realname(line2[1],run))
-				this->msg.send_message(this->fds[i].fd,"Server : USER realname is already taken \n" );
-			else
-				this->msg.send_message(this->fds[i].fd,"Server : USER username is already taken \n" );
-		}
-		else
-		{
-			this->clients[i].setusername_host(line[1]);
+
+		//Intentamos crear el real name
+		if (!this->find_client_realname(line2[1],run))
 			this->clients[i].setrealname_host(line2[1]);
-			this->msg.send_message(this->fds[i].fd,"Server : USER successfully established\n");
-		}
+		else
+			this->send_message(this->fds[i].fd,"Server : USER realname is already taken \n" );
+		//Intentamos crear el user name
+		if (!this->find_client_username(line[1],run))
+			this->clients[i].setusername_host(line[1]);
+		else
+			this->send_message(this->fds[i].fd,"Server : USER username is already taken \n" );
 	}
 	else
-	{
-		this->msg.send_message(this->fds[i].fd,"Server : Can not set up USER bad USER format\n");
-		std::cout << "Server : Could not to set up USER for client["<<i<<"]" << std::endl;
-	}
-		
+		this->send_message(this->fds[i].fd,"Server : Cannot set up USER beacuse of bad USER format\n");
   
   	return;
 }
@@ -96,16 +84,11 @@ void server::extract_MSG	(int i , std::string str , data_running *run)
 	(void)run;
 	int aux;
 	
-	aux = find_single_word_on_str(this->msg.get_message() , MESSAGE);
-	
-		
-	this->msg.set_message(clients[i].getnick() + ":" + &str[aux + 4] + "\n");
+	aux = find_single_word_on_str(str , MESSAGE);
+	//str = clients[i].getnick() + ":" + &str[aux + 4] + "\n";
 	if (this->check_client_NICK_USER(i))
-		this->msg_to_all(i);
+		this->msg_to_all(i, clients[i].getnick() + ":" + &str[aux + 4] + "\n");
 	else
-	{
-		this->msg.send_message(this->fds[i].fd,"Server : Set up ur NICK/USER first before sending an MSG\n");
-		std::cout << "Server : client["<<i<<"] couldnt send an MSG beacuse his NICK isnt set up" << std::endl;
-	}
+		this->send_message(this->fds[i].fd,"Server : Set up ur NICK/USER first before sending an MSG\n");
   return;
 }

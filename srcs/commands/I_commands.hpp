@@ -6,7 +6,7 @@
 /*   By: mortiz-d <mortiz-d@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/14 15:01:34 by mortiz-d          #+#    #+#             */
-/*   Updated: 2022/12/14 16:08:55 by mortiz-d         ###   ########.fr       */
+/*   Updated: 2023/02/09 23:42:09 by mortiz-d         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 #define I_COMMANDS_HPP
 
 #include "../general/general.hpp"
-#include "server.hpp"
+#include "../server/server.hpp"
 
 class	server;
 

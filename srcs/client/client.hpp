@@ -10,9 +10,9 @@ class	client {
 		std::string username_host;
 		std::string nick;
 		bool		op;
+		//channel		chanel;
 	public:
 
-		//pollfd		fds[N_CLIENTS];
 
 		client ( void );
 		client ( std::string rh, std::string uh, std::string ni);

@@ -21,6 +21,7 @@
 #include <unistd.h>
 #include <vector>
 #include <sstream>
+//#include "../channel/channel.hpp"
 
 //Struct para almacenar los datos del servidor
 typedef struct data_server {             
@@ -41,7 +42,11 @@ typedef struct data_running {
 } data_running; 
 
 //Funciones que cualquiera puede usar
-std::vector<std::string> split_in_vector(std::string str, char c);
-int find_single_word_on_str (std::string str , std::string word);
-int str_end_word_position (std::string str , std::string end);
+std::vector<std::string> 	split_in_vector(std::string str, char c);
+int							find_single_word_on_str (std::string str , std::string word);
+int							str_end_word_position (std::string str , std::string end);
+bool						check_data_correct(data_server data);
+
+
+
 #endif

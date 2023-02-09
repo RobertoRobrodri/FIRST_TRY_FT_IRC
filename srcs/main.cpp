@@ -6,7 +6,7 @@
 /*   By: mortiz-d <mortiz-d@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/09 12:00:57 by mortiz-d          #+#    #+#             */
-/*   Updated: 2022/11/29 14:53:53 by mortiz-d         ###   ########.fr       */
+/*   Updated: 2023/02/09 23:49:50 by mortiz-d         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ int main(int argc, char **argv)
 	if (argc != 4)
 		return (exit_msg("Unexact number of argvs"));
 	serv = new server(argv[1], argv[2], argv[3]);
-	if (serv->check_data_correct())
+	if (check_data_correct(serv->get_serv_data()))
 	{
 		std::cout << "GOOD CHECK "<< std::endl << *serv <<std::endl;
 		if (serv->server_listening())

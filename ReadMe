@@ -24,5 +24,7 @@ https://modern.ircdocs.horse/#client-to-server
 https://modern.ircdocs.horse/#rplwelcome-001
 
 CAP LS
+
 NICK miguel
+
 USER mortiz-d mortiz-d 10.11.15.4 :Miguel angel Ortiz del burgo

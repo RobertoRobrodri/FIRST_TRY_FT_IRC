@@ -6,7 +6,7 @@
 /*   By: mortiz-d <mortiz-d@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/14 15:02:30 by mortiz-d          #+#    #+#             */
-/*   Updated: 2022/12/14 15:02:33 by mortiz-d         ###   ########.fr       */
+/*   Updated: 2023/02/09 23:46:29 by mortiz-d         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,10 +25,13 @@ class	I_server {
 	public:
 
 		virtual 		~I_server 			(void){};
-		virtual bool	check_data_correct	(void) const = 0;
 		virtual int		server_listening	(void) = 0;
 		virtual int		start				(void) = 0;
-		virtual void	analize_msg			(int i, data_running *run) = 0;
+		virtual void	analize_msg			(int i , std::string str , data_running *run) = 0;
+
+		//To recieve and send messages
+		virtual int		recv_message	(int fd, std::string &str) = 0;
+		virtual int		send_message	(int fd, std::string str) = 0;
 
 		//Utilities for the server
 		virtual int		find_client_nick	(std::string str, data_running *run) = 0;
