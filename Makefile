@@ -17,7 +17,7 @@ CXXFLAGS 	= -Wall -Wextra -Werror
 #
 SRC_PATH    	= srcs
 SUBFILE1_PATH   = server
-SUBFILE2_PATH   = client
+SUBFILE2_PATH   = server_objects
 SUBFILE4_PATH   = general
 SUBFILE5_PATH   = commands
 OBJ_PATH    	= objects
@@ -27,7 +27,7 @@ TEST_PATH		= test
 
 SUBFILE1_SRC = server.cpp server_comm.cpp server_set_up.cpp  server_utilities.cpp
 
-SUBFILE2_SRC = client.cpp
+SUBFILE2_SRC = client.cpp 
 
 SUBFILE4_SRC = aux_functions.cpp check_input_data.cpp
 

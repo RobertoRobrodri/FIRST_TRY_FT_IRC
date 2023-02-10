@@ -9,10 +9,10 @@ class	client {
 		std::string realname_host;
 		std::string username_host;
 		std::string nick;
+		std::string	channel_title;
 		bool		op;
-		//channel		chanel;
+	
 	public:
-
 
 		client ( void );
 		client ( std::string rh, std::string uh, std::string ni);
@@ -23,7 +23,7 @@ class	client {
 		/*###########################################
 		#				FUNCTIONS					#
 		############################################*/
-		void clear_Client(void);
+		void clear_Client (void);
 		
 		/*###########################################
 		#				GETTERS						#
@@ -31,8 +31,8 @@ class	client {
 		std::string getnick(void)			const	{return(this->nick);};
 		std::string getrealname_host(void)	const 	{return(this->realname_host);};
 		std::string getusername_host(void)	const 	{return(this->username_host);};
+		std::string getchannel_title(void)	const 	{return(this->channel_title);};
 		bool		getoperator(void)		const 	{return(this->op);};
-
 
 		/*###########################################
 		#				SETTERS						#
@@ -40,6 +40,7 @@ class	client {
 		void setnick			(std::string str)		{this->nick = str;};
 		void setrealname_host	(std::string str)	 	{this->realname_host = str;};
 		void setusername_host	(std::string str)	 	{this->username_host = str;};
+		void setchannel_title	(std::string str)	 	{this->channel_title = str;};
 		void setuseroperator	(bool		 o)	 		{this->op = o;};
 };
 

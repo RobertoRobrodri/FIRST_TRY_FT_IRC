@@ -6,7 +6,7 @@
 /*   By: mortiz-d <mortiz-d@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/14 15:02:30 by mortiz-d          #+#    #+#             */
-/*   Updated: 2023/02/09 23:46:29 by mortiz-d         ###   ########.fr       */
+/*   Updated: 2023/02/10 02:24:29 by mortiz-d         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,8 @@ class	I_server {
 		virtual int 	find_client_username(std::string str, data_running *run) = 0;
 		virtual int		find_client_realname(std::string str, data_running *run) = 0;
 		virtual int		check_client_NICK_USER(int i) = 0;
+		// virtual int		check_channel_exist(std::string str) = 0;
+		// virtual int		channel_possition(std::string str) = 0;
 
 };
 

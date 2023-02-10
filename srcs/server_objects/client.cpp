@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "client.hpp"
+#include "objects.hpp"
 
 client::client( void ) : realname_host(""), username_host(""), nick(""), op(false)
 {
@@ -59,5 +59,6 @@ void client::clear_Client(void)
   this->realname_host = "";
   this->username_host = "";
   this->op = false;
+  this->channel_title = "";
   return ;
 }

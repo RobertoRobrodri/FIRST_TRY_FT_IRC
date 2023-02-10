@@ -3,12 +3,13 @@
 
 #define	sock_in		struct sockaddr_in
 #define	sock_addr	struct sockaddr
-#define N_CLIENTS 5+1			//Numero de Clientes (fd) + el fd del host
-#define TIMEOUT_MS 3*1000*60 	//Tiempo de desconexion en caso de no recivir nada
+#define N_CLIENTS	5+1			//Numero de Clientes (fd) + el fd del host
+#define TIMEOUT_MS	3*1000*60 	//Tiempo de desconexion en caso de no recivir nada
 
-#define NICKNAME "NICK"
-#define MESSAGE "MSG"
-#define USERNAME "USER"
+#define NICKNAME	"NICK"
+#define MESSAGE		"MSG"
+#define USERNAME	"USER"
+#define JOIN		"JOIN"
 
 
 #include <poll.h>
@@ -21,7 +22,7 @@
 #include <unistd.h>
 #include <vector>
 #include <sstream>
-//#include "../channel/channel.hpp"
+
 
 //Struct para almacenar los datos del servidor
 typedef struct data_server {             

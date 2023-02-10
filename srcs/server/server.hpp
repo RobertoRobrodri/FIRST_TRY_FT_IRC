@@ -4,8 +4,7 @@
 #include "../general/general.hpp"
 #include "I_server.hpp"
 #include "../commands/I_commands.hpp"
-#include "../client/client.hpp"
-#include "../channel/channel.hpp"
+#include "../server_objects/objects.hpp"
 
 
 
@@ -16,8 +15,7 @@ class	server : public I_server , public I_commands
 
 		pollfd				fds[N_CLIENTS];
 		client				clients[N_CLIENTS];
-		//msg					msg;
-		//channel				chanel;
+		//channel				channel[N_CLIENTS];
 		int					listening_socket;
 		data_server 		serv_data;
 
@@ -33,19 +31,21 @@ class	server : public I_server , public I_commands
 		void	search_fds		(data_running *run);
 		int		accept_client	(data_running *run);
 		int		recieve_data	(data_running *run, int i);
-		int		msg_to_all		(int i, std::string str);
+		int		msg_to_channel		(int i, std::string str);
 		int		close_fds_client(int i, data_running *run);
 		void	analize_msg		(int i , std::string str , data_running *run);
 
 		/*###########################################
 		#		UTILITIES    	FUNCTIONS			#
 		############################################*/
-		int		find_client_nick	(std::string str, data_running *run);
-		int 	find_client_username(std::string str, data_running *run);
-		int		find_client_realname(std::string str, data_running *run);
-		int		recv_message	(int fd, std::string &str);
-		int		send_message	(int fd, std::string str);
-		int		check_client_NICK_USER(int i);
+		int		find_client_nick		(std::string str, data_running *run);
+		int 	find_client_username	(std::string str, data_running *run);
+		int		find_client_realname	(std::string str, data_running *run);
+		int		recv_message			(int fd, std::string &str);
+		int		send_message			(int fd, std::string str);
+		int		check_client_NICK_USER	(int i);
+		// int 	check_channel_exist		(std::string str);
+		// int		channel_possition		(std::string str);
 
 
 		/*###########################################
@@ -61,6 +61,7 @@ class	server : public I_server , public I_commands
 		void	extract_MSG		(int i , std::string str , data_running *run);
 		void	extract_USERNAME(int i , std::string str , data_running *run);
 		void	extract_NICK	(int i , std::string str , data_running *run);
+		void	extract_JOIN	(int i , std::string str , data_running *run);
 
 	public:
 

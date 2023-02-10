@@ -6,7 +6,7 @@
 /*   By: mortiz-d <mortiz-d@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/02 18:59:58 by mortiz-d          #+#    #+#             */
-/*   Updated: 2023/02/09 23:23:28 by mortiz-d         ###   ########.fr       */
+/*   Updated: 2023/02/10 02:44:19 by mortiz-d         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,13 +17,13 @@
 void server::analize_msg (int i, std::string str , data_running *run)
 {
 	std::vector <std::string>line = split_in_vector(str,'\n');
-	std::string cmd[3] = {NICKNAME,USERNAME,MESSAGE};
-	server::funptr function[3] = {&server::extract_NICK , &server::extract_USERNAME ,&server::extract_MSG};
+	std::string cmd[4] = {NICKNAME,USERNAME,MESSAGE,JOIN};
+	server::funptr function[4] = {&server::extract_NICK , &server::extract_USERNAME ,&server::extract_MSG ,&server::extract_JOIN};
   	if (line.size() >= 1)
 	{
 		for (int y = 0; y < (int)line.size(); y++)
 		{
-			for (int x = 0; x < 3; x++)
+			for (int x = 0; x < 4; x++)
 			{
 				if (find_single_word_on_str(line[y], cmd[x]) != -1)
 					(this->*(function[x]))(i , line[y] , run);
@@ -56,8 +56,9 @@ int	server::close_fds_client(int i, data_running *run)
 	return (1);
 }
 
-int server::msg_to_all(int i, std::string str)
+int server::msg_to_channel(int i, std::string str)
 {
+	int aux;
 
 	for (int j = 0; j < N_CLIENTS; j++)
 	{
@@ -65,8 +66,12 @@ int server::msg_to_all(int i, std::string str)
 			continue;
 		if (fds[j].fd == this->listening_socket)
 			break;
-		if (!this->send_message(fds[j].fd, str))
-			return (0);
+		if (this->clients[i].getchannel_title() == this->clients[j].getchannel_title())
+		{
+			aux = this->send_message(fds[j].fd, str);
+			if (!aux)
+				return (0);
+		}
 	}
 	return (1);
 }

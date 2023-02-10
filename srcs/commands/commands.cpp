@@ -6,7 +6,7 @@
 /*   By: mortiz-d <mortiz-d@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/06 13:06:53 by mortiz-d          #+#    #+#             */
-/*   Updated: 2023/02/09 21:22:21 by mortiz-d         ###   ########.fr       */
+/*   Updated: 2023/02/10 03:08:56 by mortiz-d         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,10 +85,33 @@ void server::extract_MSG	(int i , std::string str , data_running *run)
 	int aux;
 	
 	aux = find_single_word_on_str(str , MESSAGE);
-	//str = clients[i].getnick() + ":" + &str[aux + 4] + "\n";
-	if (this->check_client_NICK_USER(i))
-		this->msg_to_all(i, clients[i].getnick() + ":" + &str[aux + 4] + "\n");
+	if (this->check_client_NICK_USER(i) && this->clients[i].getchannel_title() != "")
+		this->msg_to_channel(i, clients[i].getnick() + ":" + &str[aux + 4] + "\n");
 	else
 		this->send_message(this->fds[i].fd,"Server : Set up ur NICK/USER first before sending an MSG\n");
   return;
+}
+
+void server::extract_JOIN	(int i , std::string str , data_running *run)
+{
+	(void)run;
+	std::vector <std::string>	line;
+	line = split_in_vector(str,' ');
+
+	if (line.size() == 2)
+	{
+		//comprobamos que no este en el mismo canal ya
+		if (this->clients[i].getchannel_title() == line[1])
+			this->send_message(this->fds[i].fd,"Server : User is already on channel " +line[1]+ "\n");
+		else
+		{
+			//hace al cliente abandonar su canal y trata de unirle a otro
+			this->clients[i].setchannel_title(line[1]);
+			this->send_message(this->fds[i].fd,"Server : User joined channel " +line[1]+ "\n");
+		}
+	}
+	else
+		this->send_message(this->fds[i].fd,"Server :Error trying to JOIN channel\n");
+
+	return;
 }
