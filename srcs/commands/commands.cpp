@@ -6,7 +6,7 @@
 /*   By: mortiz-d <mortiz-d@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/06 13:06:53 by mortiz-d          #+#    #+#             */
-/*   Updated: 2023/02/10 03:08:56 by mortiz-d         ###   ########.fr       */
+/*   Updated: 2023/02/12 15:21:03 by mortiz-d         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -114,4 +114,27 @@ void server::extract_JOIN	(int i , std::string str , data_running *run)
 		this->send_message(this->fds[i].fd,"Server :Error trying to JOIN channel\n");
 
 	return;
+}
+
+void 	server::DISCONNECT_client	(int i , std::string str , data_running *run)
+{
+	(void)run;
+	std::vector <std::string>	line;
+
+	line = split_in_vector(str,' ');
+	std::cout << "Linea pa eliminar -> "<< str<< std::endl;
+	if (line.size() >= 2)
+	{
+		if (line[1] == "*" || line[1] == this->serv_data.host)
+		{
+			if (line.size() > 2)
+				this->msg_to_channel(i, clients[i].getnick() + ":" + &str[find_single_word_on_str(line[2] , MESSAGE)] + "\n");
+			this->close_fds_client(i, run);
+		}
+		else
+			this->send_message(this->fds[i].fd , "server : Cant disconnect from host "+this->serv_data.host+" beacuse of inapropiate host name -> "+line[1]+ "\n");
+		
+	}
+	else
+		this->send_message(this->fds[i].fd,"Server :Error not enought args on disconnect\n");
 }

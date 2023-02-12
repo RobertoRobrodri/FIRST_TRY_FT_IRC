@@ -6,7 +6,7 @@
 /*   By: mortiz-d <mortiz-d@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/14 15:01:34 by mortiz-d          #+#    #+#             */
-/*   Updated: 2023/02/10 01:22:27 by mortiz-d         ###   ########.fr       */
+/*   Updated: 2023/02/12 14:35:59 by mortiz-d         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@ class	I_commands {
 		virtual void extract_USERNAME	(int i , std::string str , data_running *run) = 0;
 		virtual void extract_MSG		(int i , std::string str , data_running *run) = 0;
 		virtual void extract_JOIN		(int i , std::string str , data_running *run) = 0;
+		virtual void DISCONNECT_client	(int i , std::string str , data_running *run) = 0;
 		
 };
 

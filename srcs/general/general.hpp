@@ -10,6 +10,7 @@
 #define MESSAGE		"MSG"
 #define USERNAME	"USER"
 #define JOIN		"JOIN"
+#define DISCONNECT	"DISCONNECT"
 
 
 #include <poll.h>

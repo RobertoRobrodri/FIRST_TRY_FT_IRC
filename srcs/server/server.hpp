@@ -57,11 +57,12 @@ class	server : public I_server , public I_commands
 		#			COMMANDS    FUNCTIONS			#
 		############################################*/
 		typedef void (server::*funptr) (int i , std::string str , data_running *run);
-		void 	welcome_client	(int fd);
-		void	extract_MSG		(int i , std::string str , data_running *run);
-		void	extract_USERNAME(int i , std::string str , data_running *run);
-		void	extract_NICK	(int i , std::string str , data_running *run);
-		void	extract_JOIN	(int i , std::string str , data_running *run);
+		void 	welcome_client		(int fd);
+		void	extract_MSG			(int i , std::string str , data_running *run);
+		void	extract_USERNAME	(int i , std::string str , data_running *run);
+		void	extract_NICK		(int i , std::string str , data_running *run);
+		void	extract_JOIN		(int i , std::string str , data_running *run);
+		void 	DISCONNECT_client	(int i , std::string str , data_running *run);
 
 	public:
 

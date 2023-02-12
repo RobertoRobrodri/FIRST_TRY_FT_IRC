@@ -6,7 +6,7 @@
 /*   By: mortiz-d <mortiz-d@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/02 18:59:58 by mortiz-d          #+#    #+#             */
-/*   Updated: 2023/02/10 02:44:19 by mortiz-d         ###   ########.fr       */
+/*   Updated: 2023/02/12 15:24:38 by mortiz-d         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,13 +17,13 @@
 void server::analize_msg (int i, std::string str , data_running *run)
 {
 	std::vector <std::string>line = split_in_vector(str,'\n');
-	std::string cmd[4] = {NICKNAME,USERNAME,MESSAGE,JOIN};
-	server::funptr function[4] = {&server::extract_NICK , &server::extract_USERNAME ,&server::extract_MSG ,&server::extract_JOIN};
+	std::string cmd[5] = {NICKNAME,USERNAME,MESSAGE,JOIN,DISCONNECT};
+	server::funptr function[5] = {&server::extract_NICK, &server::extract_USERNAME, &server::extract_MSG, &server::extract_JOIN, &server::DISCONNECT_client};
   	if (line.size() >= 1)
 	{
 		for (int y = 0; y < (int)line.size(); y++)
 		{
-			for (int x = 0; x < 4; x++)
+			for (int x = 0; x < 5; x++)
 			{
 				if (find_single_word_on_str(line[y], cmd[x]) != -1)
 					(this->*(function[x]))(i , line[y] , run);
@@ -39,7 +39,10 @@ int	server::close_fds_client(int i, data_running *run)
 	close(this->fds[i].fd);
 	this->fds[i].fd = -1;
 	c = this->clients[i];
-	std::cout << this->clients[i].getnick() << " se ha desconnectado" << std::endl;
+	if (this->clients[i].getnick() != "")
+		std::cout << this->clients[i].getnick() << " se ha desconnectado" << std::endl;
+	else
+		std::cout <<"Client sin NICK se ha desconnectado" << std::endl;
 	for (int x = 0; x < run->n_active_fds; x++)
 	{
 		if (fds[x].fd == -1)
