@@ -28,3 +28,12 @@ CAP LS
 NICK miguel
 
 USER mortiz-d mortiz-d 10.11.15.4 :Miguel angel Ortiz del burgo
+
+IRSSI 
+Ctrl+N : para cambiar entre salas 
+Ctrl+X : para cambiar entre servidores
+
+Orden de recibir datos RPL_1 pass -> nick -> user
+Cuando le enviamos un mensaje tiene que responder el protocolo de bienvenida
+
+https://irssi.org/documentation/help/rawlog/

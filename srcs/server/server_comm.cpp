@@ -6,7 +6,7 @@
 /*   By: mortiz-d <mortiz-d@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/02 18:59:58 by mortiz-d          #+#    #+#             */
-/*   Updated: 2023/02/12 15:24:38 by mortiz-d         ###   ########.fr       */
+/*   Updated: 2023/03/02 17:56:18 by mortiz-d         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -122,7 +122,7 @@ int	server::accept_client(data_running *run)
 		fds[run->n_active_fds - 1].fd = run->new_sd;
 		fds[run->n_active_fds - 1].events = POLLIN;
 		this->clients[run->n_active_fds - 1].clear_Client();
-		this->welcome_client(run->new_sd);
+		//this->welcome_client(run->new_sd);
 		std::cout << "New client added to the network ..." << std::endl;
 		run->n_active_fds++;
 		// fds_search_data();

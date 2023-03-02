@@ -6,7 +6,7 @@
 /*   By: mortiz-d <mortiz-d@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/06 13:06:53 by mortiz-d          #+#    #+#             */
-/*   Updated: 2023/02/12 15:21:03 by mortiz-d         ###   ########.fr       */
+/*   Updated: 2023/03/02 18:01:58 by mortiz-d         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@ void server::welcome_client(int fd)
 	return;
 }
 
+#define RPL_NICK(nick) "NICK :" + nick + "\r\n" 
 void server::extract_NICK	(int i , std::string str , data_running *run)
 {
 	(void)run;
@@ -46,6 +47,7 @@ void server::extract_NICK	(int i , std::string str , data_running *run)
 	return;
 }
 
+#define RPL_WELCOME(nick) ":localhost 001 " + nick + " : welcome\r\n"
 //BASED ON  -> USER <username> <hostname> <servername> :<realname> (RFC 1459)
 void server::extract_USERNAME	(int i , std::string str , data_running *run)
 {
@@ -69,7 +71,10 @@ void server::extract_USERNAME	(int i , std::string str , data_running *run)
 			this->send_message(this->fds[i].fd,"Server : USER realname is already taken \n" );
 		//Intentamos crear el user name
 		if (!this->find_client_username(line[1],run))
+		{
 			this->clients[i].setusername_host(line[1]);
+			this->send_message(this->fds[i].fd,RPL_WELCOME(std::string ("miguel")));
+		}
 		else
 			this->send_message(this->fds[i].fd,"Server : USER username is already taken \n" );
 	}
